@@ -1,22 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Katalyx Proposals
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) for Katalyx Proposals, a SaaS application to generate commercial proposals.
+
+## Project Setup
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS (with Typography plugin)
+- **Linting/Formatting**: ESLint & Prettier
 
 ## Getting Started
 
-First, run the development server:
+First, ensure you have Node.js and npm installed. Then, install the project dependencies:
+
+```bash
+npm install
+```
+
+Next, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+## Project Structure
+
+- `/app`: Core application routes (App Router).
+- `/components`: Reusable UI components.
+- `/lib`: Utility functions, API integrations (e.g., OpenAI).
+- `/types`: Global TypeScript type definitions.
+- `/styles`: TailwindCSS configuration and global styles (`app/globals.css`).
+- `/config`: Environment variables and application settings.
+- `/auth`: Placeholder for authentication logic.
+- `/middleware.ts`: For route protection and other request processing.
+
+## Key Libraries & Configurations
+
+- **TailwindCSS**: Configured in `tailwind.config.ts` and `postcss.config.mjs`.
+- **ESLint**: Configured in `eslint.config.mjs`.
+- **Prettier**: Configured in `.prettierrc.json`.
+- **TypeScript**: Configured in `tsconfig.json`.
 
 ## Learn More
 
