@@ -1,9 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Block } from '@/features/blocks/types/Block';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import {
+  XMarkIcon,
+  PlusIcon,
+  EyeIcon,
+  PencilIcon,
+} from '@heroicons/react/24/outline';
 
 type BlockFormProps = {
   initialData?: Partial<Block>;
@@ -147,56 +153,66 @@ export default function BlockForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
+    <form onSubmit={handleSubmit} className='space-y-8'>
       {error && (
-        <div className='bg-red-50 text-red-600 p-4 rounded-md mb-4'>
-          {error}
+        <div className='bg-katalyx-error/10 text-katalyx-error p-5 rounded-xl border border-katalyx-error/20 shadow-sm animate-pulse'>
+          <p className='font-medium'>{error}</p>
         </div>
       )}
 
       {success && (
-        <div className='bg-green-50 text-green-600 p-4 rounded-md mb-4'>
-          {success}
+        <div className='bg-katalyx-success/10 text-katalyx-success p-5 rounded-xl border border-katalyx-success/20 shadow-sm animate-pulse'>
+          <p className='font-medium'>{success}</p>
         </div>
       )}
 
       <div>
         <label
           htmlFor='title'
-          className='block text-sm font-medium text-gray-700 mb-1'
+          className='block text-sm font-medium text-gray-700 mb-2'
         >
-          Title <span className='text-red-500'>*</span>
+          Title <span className='text-katalyx-error'>*</span>
         </label>
         <input
           type='text'
           id='title'
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
+          className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary shadow-sm'
           placeholder='Enter block title'
           required
         />
       </div>
 
       <div>
-        <div className='flex justify-between items-center mb-1'>
+        <div className='flex justify-between items-center mb-2'>
           <label
             htmlFor='content'
             className='block text-sm font-medium text-gray-700'
           >
-            Content <span className='text-red-500'>*</span>
+            Content <span className='text-katalyx-error'>*</span>
           </label>
           <button
             type='button'
             onClick={togglePreview}
-            className='text-sm text-primary hover:text-primary-dark'
+            className='text-sm flex items-center text-katalyx-secondary hover:text-katalyx-secondary-light px-3 py-1.5 rounded-lg hover:bg-katalyx-secondary/10 transition-colors'
           >
-            {showPreview ? 'Edit' : 'Preview'}
+            {showPreview ? (
+              <>
+                <PencilIcon className='h-4 w-4 mr-1.5' />
+                Edit
+              </>
+            ) : (
+              <>
+                <EyeIcon className='h-4 w-4 mr-1.5' />
+                Preview
+              </>
+            )}
           </button>
         </div>
 
         {showPreview ? (
-          <div className='w-full px-3 py-2 border border-gray-300 rounded-md min-h-[200px] prose prose-sm max-w-none'>
+          <div className='w-full px-5 py-4 border border-gray-200 rounded-xl min-h-[200px] prose prose-sm max-w-none bg-katalyx-off-white shadow-sm overflow-y-auto'>
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
         ) : (
@@ -205,59 +221,70 @@ export default function BlockForm({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={8}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
+            className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary shadow-sm font-mono'
             placeholder='Enter block content (markdown supported)'
             required
           />
         )}
-        <p className='mt-1 text-xs text-gray-500'>
+        <p className='mt-1.5 text-xs text-gray-500'>
           Markdown formatting is supported (headings, lists, bold, italic, etc.)
         </p>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <div>
           <label
             htmlFor='estimatedDuration'
-            className='block text-sm font-medium text-gray-700 mb-1'
+            className='block text-sm font-medium text-gray-700 mb-2'
           >
-            Estimated Duration (days) <span className='text-red-500'>*</span>
+            Estimated Duration (days){' '}
+            <span className='text-katalyx-error'>*</span>
           </label>
-          <input
-            type='number'
-            id='estimatedDuration'
-            value={estimatedDuration}
-            onChange={(e) => setEstimatedDuration(e.target.value)}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
-            placeholder='e.g., 5'
-            min='1'
-            required
-          />
+          <div className='relative'>
+            <input
+              type='number'
+              id='estimatedDuration'
+              value={estimatedDuration}
+              onChange={(e) => setEstimatedDuration(e.target.value)}
+              className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary shadow-sm'
+              placeholder='e.g., 5'
+              min='1'
+              required
+            />
+            <span className='absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 pointer-events-none'>
+              days
+            </span>
+          </div>
         </div>
 
         <div>
           <label
             htmlFor='unitPrice'
-            className='block text-sm font-medium text-gray-700 mb-1'
+            className='block text-sm font-medium text-gray-700 mb-2'
           >
-            Unit Price (€) <span className='text-red-500'>*</span>
+            Unit Price <span className='text-katalyx-error'>*</span>
           </label>
-          <input
-            type='number'
-            id='unitPrice'
-            value={unitPrice}
-            onChange={(e) => setUnitPrice(e.target.value)}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
-            placeholder='e.g., 1000'
-            min='0'
-            step='0.01'
-            required
-          />
+          <div className='relative'>
+            <span className='absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none'>
+              €
+            </span>
+            <input
+              type='number'
+              id='unitPrice'
+              value={unitPrice}
+              onChange={(e) => setUnitPrice(e.target.value)}
+              className='w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary shadow-sm'
+              placeholder='e.g., 1000'
+              min='0'
+              step='0.01'
+              required
+            />
+          </div>
         </div>
       </div>
 
       <div>
-        <label className='block text-sm font-medium text-gray-700 mb-1'>
+        <label className='block text-sm font-medium text-gray-700 mb-2'>
           Categories
         </label>
         <div className='flex'>
@@ -266,32 +293,33 @@ export default function BlockForm({
             value={categoryInput}
             onChange={(e) => setCategoryInput(e.target.value)}
             onKeyPress={handleCategoryKeyPress}
-            className='flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary'
+            className='flex-1 px-4 py-3 border border-gray-200 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary shadow-sm'
             placeholder='Add a category'
           />
           <button
             type='button'
             onClick={handleAddCategory}
-            className='bg-primary text-white px-4 py-2 rounded-r-md hover:bg-primary-dark'
+            className='bg-gradient-primary text-white px-5 py-3 rounded-r-xl hover:shadow-button transition-all duration-300 flex items-center'
           >
+            <PlusIcon className='h-5 w-5 mr-1' />
             Add
           </button>
         </div>
 
         {categories.length > 0 && (
-          <div className='mt-2 flex flex-wrap gap-2'>
+          <div className='mt-3 flex flex-wrap gap-2 p-3 bg-white border border-gray-100 rounded-xl shadow-sm'>
             {categories.map((category, index) => (
               <div
                 key={index}
-                className='bg-gray-100 text-gray-700 px-3 py-1 rounded-full flex items-center'
+                className='bg-katalyx-tertiary/10 text-katalyx-tertiary px-3 py-1.5 rounded-full text-sm flex items-center'
               >
-                <span className='mr-1'>{category}</span>
+                <span className='mr-1.5'>{category}</span>
                 <button
                   type='button'
                   onClick={() => handleRemoveCategory(category)}
-                  className='text-gray-500 hover:text-gray-700'
+                  className='text-katalyx-tertiary hover:text-katalyx-tertiary-light rounded-full hover:bg-katalyx-tertiary/20 p-0.5'
                 >
-                  &times;
+                  <XMarkIcon className='h-4 w-4' />
                 </button>
               </div>
             ))}
@@ -299,33 +327,33 @@ export default function BlockForm({
         )}
       </div>
 
-      <div>
+      <div className='bg-white p-4 rounded-xl border border-gray-100 shadow-sm'>
         <label className='flex items-center'>
           <input
             type='checkbox'
             checked={isPublic}
             onChange={(e) => setIsPublic(e.target.checked)}
-            className='h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded'
+            className='h-5 w-5 text-katalyx-primary focus:ring-katalyx-primary border-gray-300 rounded'
           />
-          <span className='ml-2 text-sm text-gray-700'>
+          <span className='ml-3 text-sm text-gray-700'>
             Make this block public
           </span>
         </label>
       </div>
 
-      <div className='flex justify-end space-x-3'>
+      <div className='flex justify-end space-x-4 pt-4'>
         <button
           type='button'
           onClick={() => router.push('/blocks')}
-          className='px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50'
+          className='px-6 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 shadow-sm transition-all'
         >
           Cancel
         </button>
         <button
           type='submit'
           disabled={isSubmitting}
-          className={`px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark ${
-            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          className={`px-6 py-3 bg-gradient-primary text-white rounded-xl hover:shadow-button-hover transition-all duration-300 ${
+            isSubmitting ? 'opacity-70 cursor-not-allowed' : 'shadow-button'
           }`}
         >
           {isSubmitting ? 'Saving...' : isNew ? 'Create Block' : 'Update Block'}
