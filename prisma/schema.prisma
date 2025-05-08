@@ -11,13 +11,55 @@ datasource db {
 }
 
 model Block {
-    id                String   @id @default(uuid())
+    id                String          @id @default(uuid())
     title             String
     content           String // markdown or rich text
     categories        String[] // array of categories
     estimatedDuration Int
     unitPrice         Float
-    isPublic          Boolean  @default(true)
-    createdAt         DateTime @default(now())
-    updatedAt         DateTime @updatedAt
+    isPublic          Boolean         @default(true)
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    ProposalBlocks    ProposalBlock[]
+}
+
+model Proposal {
+    id         String            @id @default(uuid())
+    title      String
+    clientName String
+    createdAt  DateTime          @default(now())
+    updatedAt  DateTime          @updatedAt
+    status     String            @default("draft")
+    sections   ProposalSection[]
+}
+
+model ProposalSection {
+    id         String          @id @default(uuid())
+    title      String
+    order      Int
+    proposal   Proposal        @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+    proposalId String
+    blocks     ProposalBlock[]
+    createdAt  DateTime        @default(now())
+    updatedAt  DateTime        @updatedAt
+
+    @@index([proposalId])
+}
+
+model ProposalBlock {
+    id                String          @id @default(uuid())
+    order             Int
+    block             Block           @relation(fields: [blockId], references: [id])
+    blockId           String
+    section           ProposalSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+    sectionId         String
+    overrideTitle     String?
+    overrideContent   String?
+    overrideUnitPrice Float?
+    overrideDuration  Int?
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+
+    @@index([blockId])
+    @@index([sectionId])
 }
