@@ -22,7 +22,7 @@ export default function BlocksPage() {
     <div className='space-y-8'>
       <div className='flex justify-between items-center'>
         <div>
-          <h1 className='text-3xl font-sora font-bold bg-clip-text text-transparent bg-gradient-to-r from-katalyx-primary to-katalyx-primary-light'>
+          <h1 className='text-3xl font-sora font-bold bg-clip-text text-transparent bg-linear-to-r from-katalyx-primary to-katalyx-primary-light'>
             Content Blocks
           </h1>
           <p className='text-gray-600 mt-2'>

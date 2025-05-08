@@ -113,7 +113,7 @@ export default function Sidebar() {
           {/* User profile at bottom */}
           <div className='p-6 border-t border-gray-100'>
             <div className='flex items-center p-3 bg-white rounded-xl shadow-card'>
-              <div className='flex-shrink-0'>
+              <div className='shrink-0'>
                 <div className='h-12 w-12 rounded-xl bg-gradient-secondary flex items-center justify-center shadow-secondary-button'>
                   <UserCircleIcon className='h-8 w-8 text-white' />
                 </div>

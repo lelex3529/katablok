@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang='fr' className={`${openSans.variable} ${sora.variable}`}>
       <body className='bg-katalyx-off-white font-inter'>
-        <div className='min-h-screen bg-gradient-to-br from-katalyx-off-white via-white to-katalyx-off-white relative'>
+        <div className='min-h-screen bg-linear-to-br from-katalyx-off-white via-white to-katalyx-off-white relative'>
           {/* Decorative elements */}
           <div className='fixed inset-0 z-0 overflow-hidden'>
             <div className='absolute -top-[10%] -right-[10%] w-[35%] h-[35%] rounded-full bg-katalyx-primary/5'></div>

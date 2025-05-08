@@ -86,7 +86,7 @@ export default function Dashboard() {
       {/* En-tête */}
       <div className='flex flex-col md:flex-row md:items-center md:justify-between'>
         <div>
-          <h1 className='text-3xl font-bold text-katalyx-text font-sora bg-clip-text text-transparent bg-gradient-to-r from-katalyx-primary to-katalyx-primary-light'>
+          <h1 className='text-3xl font-bold text-katalyx-text font-sora bg-clip-text text-transparent bg-linear-to-r from-katalyx-primary to-katalyx-primary-light'>
             Tableau de bord
           </h1>
           <p className='text-katalyx-neutral-gray mt-2'>

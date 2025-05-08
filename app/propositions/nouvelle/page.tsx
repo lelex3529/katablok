@@ -55,7 +55,7 @@ export default function NewProposal() {
             <ArrowLeftIcon className='h-4 w-4 mr-1' />
             <span>Retour au tableau de bord</span>
           </Link>
-          <h1 className='text-2xl md:text-3xl font-bold font-sora bg-clip-text text-transparent bg-gradient-to-r from-katalyx-primary to-katalyx-primary-light'>
+          <h1 className='text-2xl md:text-3xl font-bold font-sora bg-clip-text text-transparent bg-linear-to-r from-katalyx-primary to-katalyx-primary-light'>
             Nouvelle proposition
           </h1>
         </div>

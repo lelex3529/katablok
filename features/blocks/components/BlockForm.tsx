@@ -17,12 +17,14 @@ type BlockFormProps = {
     data: Omit<Block, 'id' | 'createdAt' | 'updatedAt'>,
   ) => Promise<Block | null>;
   isNew?: boolean;
+  availableCategories?: string[]; // Added for autocomplete suggestions
 };
 
 export default function BlockForm({
   initialData,
   onSubmit,
   isNew = false,
+  availableCategories = [],
 }: BlockFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +46,9 @@ export default function BlockForm({
   const [categories, setCategories] = useState<string[]>(
     initialData?.categories || [],
   );
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
 
   // Add a new category
   const handleAddCategory = () => {
@@ -59,6 +64,74 @@ export default function BlockForm({
   // Remove a category
   const handleRemoveCategory = (categoryToRemove: string) => {
     setCategories(categories.filter((cat) => cat !== categoryToRemove));
+  };
+
+  // Handle category input change and filter suggestions
+  const handleCategoryInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const value = e.target.value;
+    setCategoryInput(value);
+
+    if (value.trim() === '') {
+      setShowSuggestions(false);
+      setSuggestions([]);
+      return;
+    }
+
+    // Filter available categories that match the input
+    const filtered = availableCategories.filter(
+      (cat) =>
+        cat.toLowerCase().includes(value.toLowerCase()) &&
+        !categories.includes(cat),
+    );
+
+    setSuggestions(filtered);
+    setShowSuggestions(true);
+    setActiveSuggestionIndex(0);
+  };
+
+  // Handle keyboard navigation in suggestions
+  const handleCategoryKeyDown = (e: React.KeyboardEvent) => {
+    // If no suggestions or suggestions not shown, use the normal handler
+    if (!showSuggestions || suggestions.length === 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddCategory();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setActiveSuggestionIndex((prev) =>
+          prev < suggestions.length - 1 ? prev + 1 : prev,
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setActiveSuggestionIndex((prev) => (prev > 0 ? prev - 1 : 0));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        selectSuggestion(suggestions[activeSuggestionIndex]);
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Handle selecting a suggestion
+  const selectSuggestion = (category: string) => {
+    if (!categories.includes(category)) {
+      setCategories([...categories, category]);
+    }
+    setCategoryInput('');
+    setShowSuggestions(false);
   };
 
   // Handle form submission
@@ -136,14 +209,6 @@ export default function BlockForm({
       );
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  // Handle key press in the category input
-  const handleCategoryKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddCategory();
     }
   };
 
@@ -291,8 +356,8 @@ export default function BlockForm({
           <input
             type='text'
             value={categoryInput}
-            onChange={(e) => setCategoryInput(e.target.value)}
-            onKeyPress={handleCategoryKeyPress}
+            onChange={handleCategoryInputChange}
+            onKeyDown={handleCategoryKeyDown}
             className='flex-1 px-4 py-3 border border-gray-200 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary shadow-sm'
             placeholder='Add a category'
           />
@@ -305,6 +370,24 @@ export default function BlockForm({
             Add
           </button>
         </div>
+
+        {showSuggestions && suggestions.length > 0 && (
+          <ul className='mt-2 bg-white border border-gray-200 rounded-xl shadow-sm max-h-40 overflow-y-auto'>
+            {suggestions.map((suggestion, index) => (
+              <li
+                key={index}
+                onClick={() => selectSuggestion(suggestion)}
+                className={`px-4 py-2 cursor-pointer ${
+                  index === activeSuggestionIndex
+                    ? 'bg-katalyx-primary/10 text-katalyx-primary'
+                    : 'hover:bg-gray-100'
+                }`}
+              >
+                {suggestion}
+              </li>
+            ))}
+          </ul>
+        )}
 
         {categories.length > 0 && (
           <div className='mt-3 flex flex-wrap gap-2 p-3 bg-white border border-gray-100 rounded-xl shadow-sm'>

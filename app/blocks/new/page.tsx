@@ -1,13 +1,23 @@
 'use client';
 
-import { useBlock } from '@/features/blocks/hooks/useBlocks';
+import { useBlock, useBlocks } from '@/features/blocks/hooks/useBlocks';
 import BlockForm from '@/features/blocks/components/BlockForm';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
+import { extractUniqueCategories } from '@/lib/utils';
 
 export default function NewBlockPage() {
   const router = useRouter();
   const { createBlock, error } = useBlock();
+  const { blocks } = useBlocks();
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (blocks.length > 0) {
+      setAvailableCategories(extractUniqueCategories(blocks));
+    }
+  }, [blocks]);
 
   return (
     <div className='space-y-8'>
@@ -21,7 +31,7 @@ export default function NewBlockPage() {
             <ArrowLeftIcon className='h-5 w-5 text-gray-700' />
           </button>
           <div>
-            <h1 className='text-3xl font-sora font-bold bg-clip-text text-transparent bg-gradient-to-r from-katalyx-primary to-katalyx-primary-light'>
+            <h1 className='text-3xl font-sora font-bold bg-clip-text text-transparent bg-linear-to-r from-katalyx-primary to-katalyx-primary-light'>
               Create New Block
             </h1>
             <p className='text-gray-600 mt-2'>
@@ -44,7 +54,11 @@ export default function NewBlockPage() {
       )}
 
       <div className='bg-white p-8 rounded-2xl shadow-card border border-gray-100'>
-        <BlockForm onSubmit={createBlock} isNew={true} />
+        <BlockForm
+          onSubmit={createBlock}
+          isNew={true}
+          availableCategories={availableCategories}
+        />
       </div>
     </div>
   );

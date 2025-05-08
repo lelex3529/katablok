@@ -47,8 +47,8 @@ const config: Config = {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       borderRadius: {
-        'xl': '1rem',
-        '2xl': '1.5rem',
+        'xl': '4px',
+        '2xl': '6px',
       },
     },
   },

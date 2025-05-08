@@ -4,6 +4,7 @@ import { Block } from '@/features/blocks/types/Block';
 import { formatDate } from '@/lib/utils';
 import { useState } from 'react';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import Dialog from '@/components/ui/Dialog';
 
 type BlockCardProps = {
   block: Block;
@@ -41,6 +42,28 @@ export default function BlockCard({ block, onEdit, onDelete }: BlockCardProps) {
       setShowDeleteConfirm(false);
     }
   };
+
+  // Dialog actions
+  const dialogActions = (
+    <>
+      <button
+        onClick={() => setShowDeleteConfirm(false)}
+        className='px-5 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all'
+        disabled={isDeleting}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={handleDelete}
+        className={`px-5 py-2.5 bg-linear-to-r from-katalyx-error to-red-500 text-white rounded-xl hover:shadow-lg transition-all ${
+          isDeleting ? 'opacity-70 cursor-not-allowed' : ''
+        }`}
+        disabled={isDeleting}
+      >
+        {isDeleting ? 'Deleting...' : 'Delete'}
+      </button>
+    </>
+  );
 
   return (
     <div className='group bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden border border-gray-100 relative'>
@@ -118,41 +141,20 @@ export default function BlockCard({ block, onEdit, onDelete }: BlockCardProps) {
         </div>
       </div>
 
-      {/* Delete confirmation dialog */}
-      {showDeleteConfirm && (
-        <div className='fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm'>
-          <div className='bg-white rounded-2xl p-8 max-w-sm mx-4 shadow-xl border border-gray-100'>
-            <h3 className='text-xl font-bold mb-4 text-katalyx-text'>
-              Delete Block
-            </h3>
-            <p className='mb-6 text-gray-600'>
-              Are you sure you want to delete{' '}
-              <span className='font-medium text-katalyx-text'>
-                {block.title}
-              </span>
-              ? This action cannot be undone.
-            </p>
-            <div className='flex justify-end space-x-3'>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className='px-5 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all'
-                disabled={isDeleting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className={`px-5 py-2.5 bg-gradient-to-r from-katalyx-error to-red-500 text-white rounded-xl hover:shadow-lg transition-all ${
-                  isDeleting ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Using the reusable Dialog component */}
+      <Dialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title='Delete Block'
+        actions={dialogActions}
+        size='sm'
+      >
+        <p className='text-gray-600'>
+          Are you sure you want to delete{' '}
+          <span className='font-medium text-katalyx-text'>{block.title}</span>?
+          This action cannot be undone.
+        </p>
+      </Dialog>
     </div>
   );
 }
