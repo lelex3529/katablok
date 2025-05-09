@@ -22,11 +22,14 @@ export default function BlockCard({ block, onEdit, onDelete }: BlockCardProps) {
       ? block.content.substring(0, 100) + '...'
       : block.content;
 
-  // Format price with Euro symbol
-  const formattedPrice = new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(block.unitPrice);
+  // Format price with Euro symbol if price exists
+  const formattedPrice =
+    block.unitPrice !== null && block.unitPrice !== undefined
+      ? new Intl.NumberFormat('fr-FR', {
+          style: 'currency',
+          currency: 'EUR',
+        }).format(block.unitPrice)
+      : 'N/A';
 
   // Handle delete with confirmation
   const handleDelete = async () => {
@@ -93,7 +96,12 @@ export default function BlockCard({ block, onEdit, onDelete }: BlockCardProps) {
         <div className='grid grid-cols-2 gap-3 mb-4'>
           <div className='bg-katalyx-secondary/5 p-3 rounded-xl'>
             <p className='text-xs text-katalyx-secondary mb-1'>Duration</p>
-            <p className='font-medium'>{block.estimatedDuration} days</p>
+            <p className='font-medium'>
+              {block.estimatedDuration !== null &&
+              block.estimatedDuration !== undefined
+                ? `${block.estimatedDuration} days`
+                : 'N/A'}
+            </p>
           </div>
           <div className='bg-katalyx-primary/5 p-3 rounded-xl'>
             <p className='text-xs text-katalyx-primary mb-1'>Price</p>

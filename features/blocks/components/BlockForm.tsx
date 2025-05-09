@@ -151,16 +151,24 @@ export default function BlockForm({
       return;
     }
 
-    const duration = parseInt(estimatedDuration);
-    if (isNaN(duration) || duration <= 0) {
-      setError('Estimated duration must be a positive number');
-      return;
+    // Parse duration - now optional
+    let duration: number | undefined = undefined;
+    if (estimatedDuration.trim() !== '') {
+      duration = parseInt(estimatedDuration);
+      if (isNaN(duration) || duration <= 0) {
+        setError('If provided, estimated duration must be a positive number');
+        return;
+      }
     }
 
-    const price = parseFloat(unitPrice);
-    if (isNaN(price) || price < 0) {
-      setError('Unit price must be a non-negative number');
-      return;
+    // Parse price - now optional
+    let price: number | undefined = undefined;
+    if (unitPrice.trim() !== '') {
+      price = parseFloat(unitPrice);
+      if (isNaN(price) || price < 0) {
+        setError('If provided, unit price must be a non-negative number');
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -302,8 +310,7 @@ export default function BlockForm({
             htmlFor='estimatedDuration'
             className='block text-sm font-medium text-gray-700 mb-2'
           >
-            Estimated Duration (days){' '}
-            <span className='text-katalyx-error'>*</span>
+            Estimated Duration (days)
           </label>
           <div className='relative'>
             <input
@@ -314,7 +321,6 @@ export default function BlockForm({
               className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary shadow-sm'
               placeholder='e.g., 5'
               min='1'
-              required
             />
             <span className='absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 pointer-events-none'>
               days
@@ -327,7 +333,7 @@ export default function BlockForm({
             htmlFor='unitPrice'
             className='block text-sm font-medium text-gray-700 mb-2'
           >
-            Unit Price <span className='text-katalyx-error'>*</span>
+            Unit Price
           </label>
           <div className='relative'>
             <span className='absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none'>
@@ -342,7 +348,6 @@ export default function BlockForm({
               placeholder='e.g., 1000'
               min='0'
               step='0.01'
-              required
             />
           </div>
         </div>

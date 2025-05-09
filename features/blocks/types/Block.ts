@@ -4,8 +4,8 @@ export interface Block {
   title: string;
   content: string;
   categories: string[];
-  estimatedDuration: number;
-  unitPrice: number;
+  estimatedDuration?: number;
+  unitPrice?: number;
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;

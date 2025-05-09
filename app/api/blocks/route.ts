@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     
-    // Validate required fields
-    const requiredFields = ['title', 'content', 'estimatedDuration', 'unitPrice'];
+    // Validate required fields - removed estimatedDuration and unitPrice from required fields
+    const requiredFields = ['title', 'content'];
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
         title: data.title,
         content: data.content,
         categories: Array.isArray(data.categories) ? data.categories : [],
-        estimatedDuration: Number(data.estimatedDuration),
-        unitPrice: Number(data.unitPrice),
+        estimatedDuration: data.estimatedDuration !== undefined ? Number(data.estimatedDuration) : undefined,
+        unitPrice: data.unitPrice !== undefined ? Number(data.unitPrice) : undefined,
         isPublic: data.isPublic ?? true,
       }
     });
