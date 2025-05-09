@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ProposalSection, ProposalBlock } from '@/features/proposals/types/Proposal';
 
 // GET /api/proposals/[id] - Get a single proposal
 export async function GET(
@@ -89,7 +90,7 @@ export async function PUT(
     // Start a transaction to update the proposal
     const updatedProposal = await prisma.$transaction(async (tx) => {
       // 1. Update basic proposal data
-      const proposal = await tx.proposal.update({
+      await tx.proposal.update({
         where: { id },
         data: {
           title: data.title,
@@ -98,7 +99,7 @@ export async function PUT(
       });
 
       // 2. Handle sections: delete those not in the updated data
-      const newSectionIds = data.sections.map((section: any) => section.id).filter(Boolean);
+      const newSectionIds = data.sections.map((section: Partial<ProposalSection>) => section.id).filter(Boolean);
       
       // Delete sections that are not in the updated sections array
       await tx.proposalSection.deleteMany({
@@ -111,24 +112,24 @@ export async function PUT(
       });
 
       // 3. Update or create sections
-      for (const section of data.sections) {
+      for (const section of data.sections as Partial<ProposalSection>[]) {
         if (section.id && section.id.startsWith('section-')) {
           // This is a new section (client-side ID), create it
           await tx.proposalSection.create({
             data: {
               id: undefined, // Let the database generate an ID
-              title: section.title,
-              order: section.order,
+              title: section.title as string,
+              order: section.order as number,
               proposalId: id,
               blocks: {
-                create: section.blocks.map((block: any, blockIndex: number) => ({
-                  blockId: block.blockId,
+                create: section.blocks?.map((block: Partial<ProposalBlock>, blockIndex: number) => ({
+                  blockId: block.blockId as string,
                   order: block.order || blockIndex,
                   overrideTitle: block.overrides?.title,
                   overrideContent: block.overrides?.content,
                   overrideUnitPrice: block.overrides?.unitPrice,
                   overrideDuration: block.overrides?.estimatedDuration
-                }))
+                })) || []
               }
             },
           });
@@ -137,13 +138,13 @@ export async function PUT(
           await tx.proposalSection.update({
             where: { id: section.id },
             data: {
-              title: section.title,
-              order: section.order,
+              title: section.title as string,
+              order: section.order as number,
             },
           });
 
           // 4. Handle blocks in this section
-          const newBlockIds = section.blocks.map((block: any) => block.id).filter(Boolean);
+          const newBlockIds = (section.blocks?.map((block: Partial<ProposalBlock>) => block.id).filter((id): id is string => id !== undefined) || []);
           
           // Delete blocks that are not in the updated blocks array
           await tx.proposalBlock.deleteMany({
@@ -156,15 +157,15 @@ export async function PUT(
           });
 
           // Update or create blocks
-          for (const block of section.blocks) {
+          for (const block of section.blocks || []) {
             if (block.id && block.id.startsWith('block-')) {
               // This is a new block (client-side ID), create it
               await tx.proposalBlock.create({
                 data: {
                   id: undefined, // Let the database generate an ID
-                  blockId: block.blockId,
+                  blockId: block.blockId as string,
                   sectionId: section.id,
-                  order: block.order,
+                  order: block.order as number,
                   overrideTitle: block.overrides?.title,
                   overrideContent: block.overrides?.content,
                   overrideUnitPrice: block.overrides?.unitPrice,
@@ -176,7 +177,7 @@ export async function PUT(
               await tx.proposalBlock.update({
                 where: { id: block.id },
                 data: {
-                  order: block.order,
+                  order: block.order as number,
                   overrideTitle: block.overrides?.title,
                   overrideContent: block.overrides?.content,
                   overrideUnitPrice: block.overrides?.unitPrice,

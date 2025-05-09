@@ -1,46 +1,85 @@
 import { Proposal, ProposalBlock, ProposalSection } from '../types/Proposal';
 
-// Transform database proposal to frontend format
-function mapDatabaseToFrontend(dbProposal: any): Proposal {
-  return {
-    ...dbProposal,
-    sections: dbProposal.sections.map((section: any): ProposalSection => ({
-      ...section,
-      blocks: section.blocks.map((block: any): ProposalBlock => ({
-        ...block,
-        overrides: {
-          title: block.overrideTitle,
-          content: block.overrideContent,
-          unitPrice: block.overrideUnitPrice,
-          estimatedDuration: block.overrideDuration
-        }
-      }))
-    }))
+// Database model types based on Prisma schema
+interface DbProposal {
+  id: string;
+  title: string;
+  clientName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: string;
+  sections: DbProposalSection[];
+}
+
+interface DbProposalSection {
+  id: string;
+  title: string;
+  order: number;
+  proposalId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  blocks: DbProposalBlock[];
+}
+
+interface DbProposalBlock {
+  id: string;
+  order: number;
+  blockId: string;
+  sectionId: string;
+  overrideTitle?: string | null;
+  overrideContent?: string | null;
+  overrideUnitPrice?: number | null;
+  overrideDuration?: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  block?: {
+    id: string;
+    title: string;
+    content: string;
+    categories: string[];
+    estimatedDuration?: number | null;
+    unitPrice?: number | null;
+    isPublic: boolean;
+    createdAt: Date;
+    updatedAt: Date;
   };
 }
 
-// Transform frontend proposal to database format for creation
-function mapFrontendToDatabase(proposal: Omit<Proposal, 'id' | 'createdAt' | 'updatedAt'>) {
+// Transform database proposal to frontend format
+function mapDatabaseToFrontend(dbProposal: DbProposal): Proposal {
   return {
-    title: proposal.title,
-    clientName: proposal.clientName,
-    status: 'draft',
-    sections: {
-      create: proposal.sections.map((section: ProposalSection) => ({
-        title: section.title,
-        order: section.order,
-        blocks: {
-          create: section.blocks.map((block: ProposalBlock) => ({
-            blockId: block.blockId,
-            order: block.order,
-            overrideTitle: block.overrides.title,
-            overrideContent: block.overrides.content,
-            overrideUnitPrice: block.overrides.unitPrice,
-            overrideDuration: block.overrides.estimatedDuration
-          }))
-        }
-      }))
-    }
+    ...dbProposal,
+    sections: dbProposal.sections.map((section: DbProposalSection): ProposalSection => ({
+      ...section,
+      blocks: section.blocks.map((block: DbProposalBlock): ProposalBlock => {
+        // Create a clean version of the block with nulls converted to undefined
+        const cleanBlock: ProposalBlock = {
+          id: block.id,
+          blockId: block.blockId,
+          order: block.order,
+          sectionId: block.sectionId || undefined,
+          overrideTitle: block.overrideTitle || undefined,
+          overrideContent: block.overrideContent || undefined,
+          overrideUnitPrice: block.overrideUnitPrice || undefined,
+          overrideDuration: block.overrideDuration || undefined,
+          createdAt: block.createdAt,
+          updatedAt: block.updatedAt,
+          overrides: {
+            title: block.overrideTitle || undefined,
+            content: block.overrideContent || undefined,
+            unitPrice: block.overrideUnitPrice || undefined,
+            estimatedDuration: block.overrideDuration || undefined
+          },
+          block: block.block ? {
+            ...block.block,
+            estimatedDuration: block.block.estimatedDuration || undefined,
+            unitPrice: block.block.unitPrice || undefined
+          } : undefined
+        };
+        
+        return cleanBlock;
+      })
+    }))
   };
 }
 

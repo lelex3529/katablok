@@ -264,7 +264,7 @@ export default function ProposalBlockEditor({
             <div className='bg-katalyx-primary/5 px-3 py-2 rounded-lg'>
               <span className='text-xs text-katalyx-primary'>Price:</span>
               <span className='ml-1 font-medium'>
-                €{blockUnitPrice.toLocaleString()}
+                €{blockUnitPrice?.toLocaleString()}
               </span>
             </div>
           </div>

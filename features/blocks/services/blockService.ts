@@ -118,7 +118,13 @@ export async function getServerBlock(id: string): Promise<Block | null> {
     const block = await prisma.block.findUnique({
       where: { id },
     });
-    return block;
+    
+    // Transform from Prisma model to Block type
+    return block ? {
+      ...block,
+      estimatedDuration: block.estimatedDuration ?? undefined,
+      unitPrice: block.unitPrice ?? undefined
+    } : null;
   } catch (error) {
     console.error('Failed to fetch block:', error);
     return null;
@@ -143,7 +149,12 @@ export async function getServerBlocks(
       orderBy: { updatedAt: 'desc' },
     });
 
-    return blocks;
+    // Transform from Prisma model to Block type
+    return blocks.map(block => ({
+      ...block,
+      estimatedDuration: block.estimatedDuration ?? undefined,
+      unitPrice: block.unitPrice ?? undefined
+    }));
   } catch (error) {
     console.error('Failed to fetch blocks:', error);
     return [];

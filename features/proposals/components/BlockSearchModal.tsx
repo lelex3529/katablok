@@ -127,7 +127,7 @@ export default function BlockSearchModal({
 
                   <div className='flex justify-between mt-3 text-xs text-gray-500'>
                     <span>Duration: {block.estimatedDuration} days</span>
-                    <span>Price: €{block.unitPrice.toLocaleString()}</span>
+                    <span>Price: €{block.unitPrice?.toLocaleString()}</span>
                   </div>
 
                   {block.categories.length > 0 && (

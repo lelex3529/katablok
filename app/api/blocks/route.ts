@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     
     // Build filter conditions
-    const where: any = {};
+    const where: {
+      title?: { contains: string, mode: 'insensitive' };
+      categories?: { has: string };
+    } = {};
     
     if (title) {
       where.title = { contains: title, mode: 'insensitive' };

@@ -14,7 +14,7 @@ export function formatDate(date: Date | string): string {
 /**
  * Extracts all unique categories from an array of blocks
  */
-export function extractUniqueCategories(blocks: any[]): string[] {
+export function extractUniqueCategories(blocks: { categories?: string[] }[]): string[] {
   const categories = new Set<string>();
   
   blocks.forEach(block => {

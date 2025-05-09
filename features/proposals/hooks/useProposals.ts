@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Proposal } from '../types/Proposal';
+import { Proposal, ProposalBlock, ProposalSection } from '../types/Proposal';
 import * as proposalService from '../services/proposalService';
 
 export function useProposals() {
@@ -143,7 +143,7 @@ export function useProposalDraft() {
   };
 
   // Update specific properties
-  const updateProperty = (property: keyof Omit<Proposal, 'id' | 'createdAt' | 'updatedAt' | 'sections'>, value: any) => {
+  const updateProperty = (property: keyof Omit<Proposal, 'id' | 'createdAt' | 'updatedAt' | 'sections'>, value: string | number | boolean | Date) => {
     setDraft(prev => ({
       ...prev,
       [property]: value,

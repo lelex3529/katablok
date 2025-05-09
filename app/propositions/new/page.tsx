@@ -98,7 +98,7 @@ export default function NewProposalPage() {
           <li className='flex items-start'>
             <span className='text-katalyx-primary mr-2'>•</span>
             <span>
-              Customize block content to match the client's specific
+              Customize block content to match the client&apos;s specific
               requirements
             </span>
           </li>

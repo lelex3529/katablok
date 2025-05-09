@@ -15,7 +15,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { v4 as uuidv4 } from 'uuid';
 
 interface SectionEditorProps {
   section: ProposalSection;

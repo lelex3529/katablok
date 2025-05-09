@@ -1,9 +1,9 @@
 'use client';
 
-import { Proposal } from '../types/Proposal';
+import { Proposal, ProposalBlock } from '../types/Proposal';
 import ReactMarkdown from 'react-markdown';
 import { formatDate } from '@/lib/utils';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import {
   XMarkIcon,
   ArrowDownTrayIcon,
@@ -55,7 +55,7 @@ export default function ProposalPreview({
   }, 0);
 
   // Get block content considering overrides
-  const getBlockContent = (block: any) => {
+  const getBlockContent = (block: ProposalBlock) => {
     return (
       block.overrideContent ||
       block.overrides?.content ||
@@ -65,7 +65,7 @@ export default function ProposalPreview({
   };
 
   // Get block title considering overrides
-  const getBlockTitle = (block: any) => {
+  const getBlockTitle = (block: ProposalBlock) => {
     return (
       block.overrideTitle || block.overrides?.title || block.block?.title || ''
     );
@@ -150,9 +150,9 @@ export default function ProposalPreview({
           <div className='prose prose-gray max-w-none'>
             <p>
               This proposal outlines the services offered by YourCompany to{' '}
-              {proposal.clientName}. We're excited to collaborate with you on
-              this project and believe our expertise will help you achieve your
-              business goals.
+              {proposal.clientName}. We&apos;re excited to collaborate with you
+              on this project and believe our expertise will help you achieve
+              your business goals.
             </p>
           </div>
         </div>

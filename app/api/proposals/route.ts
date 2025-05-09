@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ProposalSection, ProposalBlock } from '@/features/proposals/types/Proposal';
 
 // GET /api/proposals - Get all proposals
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const proposals = await prisma.proposal.findMany({
       include: {
@@ -63,21 +64,21 @@ export async function POST(request: NextRequest) {
       });
 
       // 2. Create sections
-      for (const section of data.sections) {
+      for (const section of data.sections as Partial<ProposalSection>[]) {
         const newSection = await tx.proposalSection.create({
           data: {
-            title: section.title,
-            order: section.order,
+            title: section.title as string,
+            order: section.order as number,
             proposalId: newProposal.id,
           },
         });
 
         // 3. Create blocks for this section
         if (section.blocks && section.blocks.length > 0) {
-          for (const block of section.blocks) {
+          for (const block of section.blocks as Partial<ProposalBlock>[]) {
             await tx.proposalBlock.create({
               data: {
-                blockId: block.blockId,
+                blockId: block.blockId as string,
                 sectionId: newSection.id,
                 order: block.order || 0,
                 overrideTitle: block.overrideTitle || block.overrides?.title,

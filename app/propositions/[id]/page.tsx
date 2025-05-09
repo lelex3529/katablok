@@ -154,7 +154,7 @@ export default function EditProposalPage() {
             <li className='flex items-start'>
               <span className='text-katalyx-primary mr-2'>•</span>
               <span>
-                Remember to save your changes when you're done editing
+                Remember to save your changes when you&apos;re done editing
               </span>
             </li>
           </ul>

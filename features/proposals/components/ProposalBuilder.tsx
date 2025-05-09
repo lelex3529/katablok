@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useProposalDraft } from '../hooks/useProposals';
-import { ProposalSection, Proposal } from '../types/Proposal';
+import { Proposal } from '../types/Proposal';
 import SectionEditor from './SectionEditor';
 import {
   PlusIcon,
@@ -74,7 +74,7 @@ export default function ProposalBuilder({
   const sortedSections = [...draft.sections].sort((a, b) => a.order - b.order);
 
   // Handle saving the proposal
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (onSave) {
       try {
         setIsSaving(true);
@@ -116,7 +116,7 @@ export default function ProposalBuilder({
         setIsSaving(false);
       }
     }
-  };
+  }, [onSave, draft, markAsSaved]);
 
   // Move a section up or down
   const moveSection = (currentIndex: number, direction: 'up' | 'down') => {
@@ -134,9 +134,9 @@ export default function ProposalBuilder({
   };
 
   // Handle preview
-  const handlePreview = () => {
+  const handlePreview = useCallback(() => {
     setShowPreview(true);
-  };
+  }, []);
 
   const closePreview = () => {
     setShowPreview(false);
@@ -166,7 +166,7 @@ export default function ProposalBuilder({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [addSection]);
+  }, [addSection, handleSave, handlePreview]);
 
   // Show a warning when unsaved changes exist
   useEffect(() => {
@@ -298,7 +298,7 @@ export default function ProposalBuilder({
             <div>
               <p className='text-sm text-gray-500 mb-1'>Total Cost</p>
               <p className='text-2xl font-sora font-bold text-katalyx-primary'>
-                €{totalCost.toLocaleString()}
+                {totalCost.toLocaleString()}€
               </p>
             </div>
 
@@ -389,8 +389,8 @@ export default function ProposalBuilder({
         <Dialog
           isOpen={showPreview}
           onClose={closePreview}
-          className='w-full max-w-7xl'
-          showCloseButton={false}
+          title='Proposal Preview'
+          size='lg'
         >
           <ProposalPreview
             proposal={{
