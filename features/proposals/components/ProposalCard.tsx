@@ -72,7 +72,7 @@ export default function ProposalCard({
 
   const handleEditProposal = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/propositions/${proposal.id}/edit`);
+    router.push(`/propositions/${proposal.id}/`);
   };
 
   const handleDeleteClick = async (e: React.MouseEvent) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useProposalDraft } from '../hooks/useProposals';
 import { ProposalSection, Proposal } from '../types/Proposal';
 import SectionEditor from './SectionEditor';
@@ -41,6 +41,7 @@ export default function ProposalBuilder({
     markAsSaved,
     duplicateSection,
     duplicateBlock,
+    updateDraft,
   } = useProposalDraft();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -49,12 +50,22 @@ export default function ProposalBuilder({
   const [showUnsavedChangesAlert, setShowUnsavedChangesAlert] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+  const isInitialized = useRef(false);
+
   // Initialize with initialProposal if provided
   useEffect(() => {
-    if (initialProposal) {
-      // Implementation would go here if we were editing an existing proposal
+    if (initialProposal && !isInitialized.current) {
+      // Implementation for editing an existing proposal
+      const proposalToEdit = {
+        ...initialProposal,
+        updatedAt: initialProposal.updatedAt || new Date(),
+      } as Proposal;
+
+      updateDraft(proposalToEdit);
+      markAsSaved();
+      isInitialized.current = true;
     }
-  }, [initialProposal]);
+  }, [initialProposal, markAsSaved, updateDraft]);
 
   // Calculate totals
   const { totalCost, totalDuration } = getTotals();

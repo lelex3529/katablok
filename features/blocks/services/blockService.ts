@@ -1,5 +1,7 @@
 import { Block } from '../types/Block';
 
+import { prisma } from '@/lib/prisma';
+
 /**
  * Fetches all blocks with optional filtering
  */
@@ -105,5 +107,45 @@ export async function deleteBlock(id: string): Promise<void> {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Failed to delete block');
+  }
+}
+
+/**
+ * Server-side function to get a block by ID
+ */
+export async function getServerBlock(id: string): Promise<Block | null> {
+  try {
+    const block = await prisma.block.findUnique({
+      where: { id },
+    });
+    return block;
+  } catch (error) {
+    console.error('Failed to fetch block:', error);
+    return null;
+  }
+}
+
+/**
+ * Server-side function to get all blocks with optional filtering
+ */
+export async function getServerBlocks(
+  title?: string,
+  category?: string
+): Promise<Block[]> {
+  try {
+    const where = {
+      ...(title && { title: { contains: title, mode: 'insensitive' as const } }),
+      ...(category && { category }),
+    };
+
+    const blocks = await prisma.block.findMany({
+      where,
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return blocks;
+  } catch (error) {
+    console.error('Failed to fetch blocks:', error);
+    return [];
   }
 }
