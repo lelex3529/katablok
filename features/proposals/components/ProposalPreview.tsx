@@ -52,9 +52,11 @@ export default function ProposalPreview({
             ? block.overrideDuration
             : block.overrides?.estimatedDuration !== undefined
               ? block.overrides.estimatedDuration
-              : block.block?.estimatedDuration || 0;
-
-        return sectionTotal + duration;
+              : block.block?.estimatedDuration;
+        return (
+          sectionTotal +
+          (typeof duration === 'number' && !isNaN(duration) ? duration : 0)
+        );
       }, 0)
     );
   }, 0);
@@ -68,9 +70,11 @@ export default function ProposalPreview({
             ? block.overrideUnitPrice
             : block.overrides?.unitPrice !== undefined
               ? block.overrides.unitPrice
-              : block.block?.unitPrice || 0;
-
-        return sectionTotal + price;
+              : block.block?.unitPrice;
+        return (
+          sectionTotal +
+          (typeof price === 'number' && !isNaN(price) ? price : 0)
+        );
       }, 0)
     );
   }, 0);
@@ -213,34 +217,39 @@ export default function ProposalPreview({
   // Calculate project timeline
   const calculateTimeline = () => {
     let currentWeek = 1;
-    const timelineData = proposal.sections
+    // Only include sections with a total duration > 0
+    return proposal.sections
       .sort((a, b) => a.order - b.order)
       .map((section) => {
         const sectionDuration = section.blocks.reduce((total, block) => {
           const duration = getBlockDuration(block);
-          return total + (duration || 0);
+          return (
+            total +
+            (typeof duration === 'number' && !isNaN(duration) ? duration : 0)
+          );
         }, 0);
-
-        // Convert days to weeks (assuming 5 working days per week)
+        // Skip sections with no duration
+        if (!sectionDuration) return null;
         const durationInWeeks = Math.ceil(sectionDuration / 5);
-
-        // Use expected delivery if provided, otherwise calculate based on current position
         const startWeek = section.expectedDeliveryStart || currentWeek;
         const endWeek =
           section.expectedDeliveryEnd || startWeek + durationInWeeks - 1;
-
         currentWeek = endWeek + 1;
-
+        // Collect block titles for description
+        const blockTitles = section.blocks
+          .map(getBlockTitle)
+          .filter(Boolean)
+          .join(', ');
         return {
           name: section.title,
+          description: blockTitles,
           startWeek,
           endWeek,
           duration: durationInWeeks,
           durationDays: sectionDuration,
         };
-      });
-
-    return timelineData;
+      })
+      .filter(Boolean);
   };
 
   // Calculate total number of pages for pagination
@@ -327,7 +336,45 @@ export default function ProposalPreview({
             </div>
           </div>
 
-          {/* Table of Contents */}
+          {/* Proposal Introduction (before ToC) */}
+          {proposal.introduction && proposal.introduction.trim() && (
+            <>
+              <div className='page-break'></div>
+              <div
+                className='relative'
+                style={{
+                  width: `${A4_WIDTH_PX}px`,
+                  height: `${A4_HEIGHT_PX}px`,
+                }}
+              >
+                <div className='absolute inset-0 p-10 flex flex-col'>
+                  {/* Header with Client Name */}
+                  <div className='h-20 flex justify-between items-start'>
+                    <div>
+                      <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
+                        Introduction
+                      </h2>
+                    </div>
+                    <div className='text-sm text-gray-600'>
+                      <p>For: {proposal.clientName}</p>
+                    </div>
+                  </div>
+                  {/* Content */}
+                  <div className='flex-grow overflow-hidden'>
+                    <div className='prose prose-gray max-w-none'>
+                      <ReactMarkdown>{proposal.introduction}</ReactMarkdown>
+                    </div>
+                  </div>
+                  {/* Footer */}
+                  <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
+                    <p>Page 2 of {totalPages}</p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Table of Contents (now after Introduction) */}
           <div className='page-break'></div>
           <div
             className='relative'
@@ -358,55 +405,6 @@ export default function ProposalPreview({
                       <LinkIcon className='h-3 w-3 mr-1' />
                     </div>
                   ))}
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                <p>Page 2 of {totalPages}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Executive Summary */}
-          <div className='page-break'></div>
-          <div
-            className='relative'
-            style={{ width: `${A4_WIDTH_PX}px`, height: `${A4_HEIGHT_PX}px` }}
-          >
-            <div className='absolute inset-0 p-10 flex flex-col'>
-              {/* Header with Client Name */}
-              <div className='h-20 flex justify-between items-start'>
-                <div>
-                  <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                    Executive Summary
-                  </h2>
-                </div>
-                <div className='text-sm text-gray-600'>
-                  <p>For: {proposal.clientName}</p>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className='flex-grow overflow-hidden'>
-                <div className='prose prose-gray max-w-none'>
-                  <p>
-                    This proposal outlines the services offered by YourCompany
-                    to {proposal.clientName}. We&apos;re excited to collaborate
-                    with you on this project and believe our expertise will help
-                    you achieve your business goals.
-                  </p>
-                  <p className='mt-4'>
-                    In this document, we outline our approach, the scope of
-                    work, timeline, and budget breakdown. We&apos;ve carefully
-                    considered your requirements to deliver a solution that
-                    meets your needs and exceeds your expectations.
-                  </p>
-                  <p className='mt-4'>
-                    Our team of experts is ready to begin working with you as
-                    soon as you approve this proposal. We look forward to a
-                    successful partnership.
-                  </p>
                 </div>
               </div>
 
@@ -462,33 +460,37 @@ export default function ProposalPreview({
                                 </ReactMarkdown>
                               </div>
 
-                              {(blockDuration !== undefined ||
-                                blockPrice !== undefined) && (
+                              {(typeof blockDuration === 'number' &&
+                                !isNaN(blockDuration)) ||
+                              (typeof blockPrice === 'number' &&
+                                !isNaN(blockPrice)) ? (
                                 <div className='bg-gray-50 rounded-lg p-4 text-sm'>
                                   <div className='flex justify-between'>
-                                    {blockDuration !== undefined && (
-                                      <div>
-                                        <span className='text-gray-500'>
-                                          Estimated Duration:
-                                        </span>
-                                        <span className='ml-2 font-medium'>
-                                          {blockDuration} days
-                                        </span>
-                                      </div>
-                                    )}
-                                    {blockPrice !== undefined && (
-                                      <div>
-                                        <span className='text-gray-500'>
-                                          Cost:
-                                        </span>
-                                        <span className='ml-2 font-medium'>
-                                          {blockPrice?.toLocaleString()}€
-                                        </span>
-                                      </div>
-                                    )}
+                                    {typeof blockDuration === 'number' &&
+                                      !isNaN(blockDuration) && (
+                                        <div>
+                                          <span className='text-gray-500'>
+                                            Estimated Duration:
+                                          </span>
+                                          <span className='ml-2 font-medium'>
+                                            {blockDuration} days
+                                          </span>
+                                        </div>
+                                      )}
+                                    {typeof blockPrice === 'number' &&
+                                      !isNaN(blockPrice) && (
+                                        <div>
+                                          <span className='text-gray-500'>
+                                            Cost:
+                                          </span>
+                                          <span className='ml-2 font-medium'>
+                                            {blockPrice?.toLocaleString()}€
+                                          </span>
+                                        </div>
+                                      )}
                                   </div>
                                 </div>
-                              )}
+                              ) : null}
                             </div>
                           );
                         })}
@@ -546,7 +548,14 @@ export default function ProposalPreview({
                     <tbody>
                       {calculateTimeline().map((item, index) => (
                         <tr key={index} className='border-b border-gray-200'>
-                          <td className='py-3 px-2 font-medium'>{item.name}</td>
+                          <td className='py-3 px-2 font-medium'>
+                            {item.name}
+                            {item.description && (
+                              <div className='text-xs text-gray-500 font-normal mt-1'>
+                                {item.description}
+                              </div>
+                            )}
+                          </td>
                           <td className='py-3 px-2'>Week {item.startWeek}</td>
                           <td className='py-3 px-2'>Week {item.endWeek}</td>
                           <td className='py-3 px-2 text-right'>
@@ -625,7 +634,7 @@ export default function ProposalPreview({
                             Section
                           </th>
                           <th className='py-3 px-2 text-gray-700 font-medium'>
-                            Blocks
+                            Description
                           </th>
                           <th className='py-3 px-2 text-gray-700 font-medium text-right'>
                             Subtotal
@@ -633,40 +642,47 @@ export default function ProposalPreview({
                         </tr>
                       </thead>
                       <tbody>
-                        {proposal.sections.map((section) => {
-                          const sectionPrice = section.blocks.reduce(
-                            (total, block) => {
-                              const blockPrice = getBlockPrice(block);
-                              return total + (blockPrice || 0);
-                            },
-                            0,
-                          );
-
-                          return (
-                            <tr
-                              key={section.id}
-                              className='border-b border-gray-200'
-                            >
-                              <td className='py-3 px-2 font-medium'>
-                                {section.title}
-                              </td>
-                              <td className='py-3 px-2'>
-                                {section.blocks.length}
-                              </td>
-                              <td className='py-3 px-2 text-right'>
-                                €{sectionPrice.toLocaleString()}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        {proposal.sections
+                          .map((section) => {
+                            const sectionPrice = section.blocks.reduce(
+                              (total, block) => {
+                                const blockPrice = getBlockPrice(block);
+                                return (
+                                  total +
+                                  (typeof blockPrice === 'number' &&
+                                  !isNaN(blockPrice)
+                                    ? blockPrice
+                                    : 0)
+                                );
+                              },
+                              0,
+                            );
+                            if (!sectionPrice) return null;
+                            const blockTitles = section.blocks
+                              .map(getBlockTitle)
+                              .filter(Boolean)
+                              .join(', ');
+                            return (
+                              <tr
+                                key={section.id}
+                                className='border-b border-gray-200'
+                              >
+                                <td className='py-3 px-2 font-medium'>
+                                  {section.title}
+                                </td>
+                                <td className='py-3 px-2 text-gray-500 text-sm'>
+                                  {blockTitles}
+                                </td>
+                                <td className='py-3 px-2 text-right'>
+                                  €{sectionPrice.toLocaleString()}
+                                </td>
+                              </tr>
+                            );
+                          })
+                          .filter(Boolean)}
                         <tr className='font-medium bg-white border-t-2 border-gray-300'>
                           <td className='py-4 px-2'>Total</td>
-                          <td className='py-4 px-2'>
-                            {proposal.sections.reduce(
-                              (total, section) => total + section.blocks.length,
-                              0,
-                            )}
-                          </td>
+                          <td className='py-4 px-2'></td>
                           <td className='py-4 px-2 text-right text-katalyx-primary font-bold text-lg'>
                             €{totalPrice?.toLocaleString()}
                           </td>
