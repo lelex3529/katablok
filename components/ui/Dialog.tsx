@@ -29,7 +29,7 @@ export default function Dialog({
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
-    lg: 'max-w-lg',
+    lg: 'max-w-4xl',
   };
 
   return (
@@ -38,11 +38,11 @@ export default function Dialog({
       onClick={onClose}
     >
       <div
-        className={`bg-white rounded-2xl p-8 mx-4 shadow-xl bordrp border-gray-100 ${sizeClasses[size]}`}
+        className={`bg-white rounded-2xl p-8 mx-4 shadow-xl max-h-[80vh] bordrp border-gray-100 ${sizeClasses[size]}`}
         onClick={stopPropagation}
       >
         <h3 className='text-xl font-bold mb-4 text-katalyx-text'>{title}</h3>
-        <div className='mb-6'>{children}</div>
+        <div className='mb-6 max-h-[70vh] overflow-y-scroll'>{children}</div>
         {actions && <div className='flex justify-end space-x-3'>{actions}</div>}
       </div>
     </div>

@@ -1,6 +1,12 @@
 // Proposal type definitions
 import { Block } from "@/features/blocks/types/Block";
 
+export interface PaymentTerm {
+  label: string;
+  percent: number;
+  trigger: string;
+}
+
 export interface ProposalBlock {
   id: string;
   blockId: string;  // refers to a Block
@@ -30,6 +36,8 @@ export interface ProposalSection {
   blocks: ProposalBlock[];
   createdAt?: Date;
   updatedAt?: Date;
+  expectedDeliveryStart?: number; // in weeks from project start
+  expectedDeliveryEnd?: number; // in weeks from project start
 }
 
 export interface Proposal {
@@ -40,4 +48,5 @@ export interface Proposal {
   updatedAt: Date;
   status?: string;
   sections: ProposalSection[];
+  paymentTerms?: PaymentTerm[];
 }

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { ProposalSection, ProposalBlock } from '@/features/proposals/types/Proposal';
+import { ProposalSection, ProposalBlock, PaymentTerm } from '@/features/proposals/types/Proposal';
+import { Prisma } from '@prisma/client';
+
+// Define a proper type for the Proposal metadata
+interface ProposalMetadata {
+  paymentTerms?: PaymentTerm[];
+  [key: string]: unknown;  // Allow for additional metadata properties
+}
 
 // GET /api/proposals/[id] - Get a single proposal
 export async function GET(
@@ -38,7 +45,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(proposal);
+    // Get payment terms from metadata column or return empty array
+    const metadata = proposal.metadata as Prisma.JsonValue;
+    const proposalMetadata = metadata as unknown as ProposalMetadata | null;
+    const paymentTerms = proposalMetadata?.paymentTerms || [];
+    const responseProposal = { ...proposal, paymentTerms };
+
+    return NextResponse.json(responseProposal);
   } catch (error) {
     console.error('Error fetching proposal:', error);
     return NextResponse.json(
@@ -95,6 +108,10 @@ export async function PUT(
         data: {
           title: data.title,
           clientName: data.clientName,
+          // Store payment terms in the metadata column
+          metadata: {
+            paymentTerms: data.paymentTerms || []
+          }
         },
       });
 
@@ -212,7 +229,13 @@ export async function PUT(
       });
     });
 
-    return NextResponse.json(updatedProposal);
+    // Get payment terms from metadata column or return empty array
+    const metadata = updatedProposal?.metadata as Prisma.JsonValue;
+    const proposalMetadata = metadata as unknown as ProposalMetadata | null;
+    const paymentTerms = proposalMetadata?.paymentTerms || [];
+    const responseProposal = { ...updatedProposal, paymentTerms };
+
+    return NextResponse.json(responseProposal);
   } catch (error) {
     console.error('Error updating proposal:', error);
     return NextResponse.json(

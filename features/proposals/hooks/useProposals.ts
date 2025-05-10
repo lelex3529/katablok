@@ -143,7 +143,10 @@ export function useProposalDraft() {
   };
 
   // Update specific properties
-  const updateProperty = (property: keyof Omit<Proposal, 'id' | 'createdAt' | 'updatedAt' | 'sections'>, value: string | number | boolean | Date) => {
+  const updateProperty = <T extends keyof Omit<Proposal, 'id' | 'createdAt' | 'updatedAt' | 'sections'>>(
+    property: T, 
+    value: Proposal[T]
+  ) => {
     setDraft(prev => ({
       ...prev,
       [property]: value,

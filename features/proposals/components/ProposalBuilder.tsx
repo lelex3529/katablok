@@ -2,15 +2,30 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useProposalDraft } from '../hooks/useProposals';
-import { Proposal } from '../types/Proposal';
+import { Proposal, PaymentTerm } from '../types/Proposal';
 import SectionEditor from './SectionEditor';
 import {
   PlusIcon,
   DocumentTextIcon,
   ArrowPathIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import ProposalPreview from './ProposalPreview';
 import Dialog from '@/components/ui/Dialog';
+
+// Default payment terms options
+const DEFAULT_PAYMENT_TERMS: PaymentTerm[][] = [
+  [
+    { label: '40%', percent: 40, trigger: 'upon order' },
+    { label: '30%', percent: 30, trigger: 'after validation' },
+    { label: '20%', percent: 20, trigger: 'after delivery' },
+    { label: '10%', percent: 10, trigger: 'on go-live' },
+  ],
+  [
+    { label: '50%', percent: 50, trigger: 'upon order' },
+    { label: '50%', percent: 50, trigger: 'after delivery' },
+  ],
+];
 
 interface ProposalBuilderProps {
   onSave?: (
@@ -49,6 +64,10 @@ export default function ProposalBuilder({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showUnsavedChangesAlert, setShowUnsavedChangesAlert] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [selectedPaymentTerms, setSelectedPaymentTerms] = useState<
+    PaymentTerm[]
+  >(initialProposal?.paymentTerms || DEFAULT_PAYMENT_TERMS[0]);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   const isInitialized = useRef(false);
 
@@ -64,8 +83,24 @@ export default function ProposalBuilder({
       updateDraft(proposalToEdit);
       markAsSaved();
       isInitialized.current = true;
+
+      // Set payment terms if available
+      if (initialProposal.paymentTerms) {
+        setSelectedPaymentTerms(initialProposal.paymentTerms);
+      }
     }
   }, [initialProposal, markAsSaved, updateDraft]);
+
+  // Update payment terms in draft when they change - but only if they're really different
+  useEffect(() => {
+    // Using JSON.stringify for deep comparison of payment terms
+    const currentTerms = JSON.stringify(draft.paymentTerms || []);
+    const newTerms = JSON.stringify(selectedPaymentTerms);
+
+    if (currentTerms !== newTerms) {
+      updateProperty('paymentTerms', selectedPaymentTerms);
+    }
+  }, [selectedPaymentTerms, updateProperty, draft.paymentTerms]);
 
   // Calculate totals
   const { totalCost, totalDuration } = getTotals();
@@ -84,6 +119,7 @@ export default function ProposalBuilder({
         const proposalToSave = {
           title: draft.title,
           clientName: draft.clientName,
+          paymentTerms: selectedPaymentTerms,
           sections: draft.sections.map((section) => ({
             ...section,
             blocks: section.blocks.map((block) => ({
@@ -116,7 +152,13 @@ export default function ProposalBuilder({
         setIsSaving(false);
       }
     }
-  }, [onSave, draft, markAsSaved]);
+  }, [onSave, draft, markAsSaved, selectedPaymentTerms]);
+
+  // Select payment terms
+  const selectPaymentTerms = (terms: PaymentTerm[]) => {
+    setSelectedPaymentTerms(terms);
+    setShowPaymentOptions(false);
+  };
 
   // Move a section up or down
   const moveSection = (currentIndex: number, direction: 'up' | 'down') => {
@@ -282,6 +324,75 @@ export default function ProposalBuilder({
         )}
       </div>
 
+      {/* Payment Terms */}
+      <div className='mb-8'>
+        <h2 className='text-lg font-medium mb-4'>Payment Terms</h2>
+        <div className='bg-white rounded-xl border border-gray-200 p-6'>
+          <label className='block text-sm font-medium text-gray-700 mb-2'>
+            Payment Schedule
+          </label>
+
+          <div className='relative'>
+            <button
+              className='flex items-center justify-between w-full px-4 py-3 border border-gray-300 rounded-lg text-left mb-4 bg-white hover:bg-gray-50'
+              onClick={() => setShowPaymentOptions(!showPaymentOptions)}
+            >
+              <span>
+                {selectedPaymentTerms.reduce(
+                  (acc, term) => acc + term.percent,
+                  0,
+                ) === 100
+                  ? `${selectedPaymentTerms.length} payment ${selectedPaymentTerms.length > 1 ? 'installments' : 'installment'}`
+                  : 'Select payment terms'}
+              </span>
+              <ChevronDownIcon className='h-5 w-5' />
+            </button>
+
+            {showPaymentOptions && (
+              <div className='absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1'>
+                <div className='p-2'>
+                  {DEFAULT_PAYMENT_TERMS.map((terms, index) => (
+                    <button
+                      key={index}
+                      className='w-full text-left px-4 py-3 hover:bg-gray-100 rounded'
+                      onClick={() => selectPaymentTerms(terms)}
+                    >
+                      {terms.map((t) => `${t.label} ${t.trigger}`).join(', ')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {selectedPaymentTerms.length > 0 && (
+            <div className='bg-gray-50 rounded-lg p-4'>
+              <ul className='space-y-2'>
+                {selectedPaymentTerms.map((term, index) => (
+                  <li key={index} className='flex items-start'>
+                    <span className='text-katalyx-primary mr-2 text-lg leading-6'>
+                      •
+                    </span>
+                    <span>
+                      <strong>{term.label}</strong> (€
+                      {Math.round(
+                        (totalCost * term.percent) / 100,
+                      ).toLocaleString()}
+                      ) {term.trigger}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <p className='mt-4 text-sm text-gray-500'>
+            These payment terms will be displayed in the proposal and can be
+            adjusted before finalizing.
+          </p>
+        </div>
+      </div>
+
       {/* Summary and totals */}
       {sortedSections.length > 0 && (
         <div className='mb-8 bg-gray-50 p-6 rounded-xl border border-gray-200'>
@@ -399,6 +510,7 @@ export default function ProposalBuilder({
               createdAt: draft.createdAt || new Date().toISOString(),
               updatedAt: draft.updatedAt || new Date().toISOString(),
               status: draft.status || 'draft',
+              paymentTerms: selectedPaymentTerms,
             }}
             onClose={closePreview}
           />

@@ -27,6 +27,7 @@ model Proposal {
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
   status     String            @default("draft")
+  metadata   Json? // Added metadata field to store payment terms and other flexible data
   sections   ProposalSection[]
 }
 
