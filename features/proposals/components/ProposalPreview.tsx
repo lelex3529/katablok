@@ -10,6 +10,43 @@ import {
   ArrowsPointingOutIcon,
   LinkIcon,
 } from '@heroicons/react/24/outline';
+import Image from 'next/image';
+
+// Katalyx company info for footer
+const katalyxInfo = {
+  name: 'KATALYX',
+  address: '67 COURS MIRABEAU 13100 AIX-EN-PROVENCE',
+  email: 'contact@katalyx.fr',
+  phone: '06 60 84 82 81',
+  siret: '94161492700015',
+  tva: 'FR26941614927',
+};
+
+const KatalyxFooter: React.FC<{ pageNumber: number; totalPages: number }> = ({
+  pageNumber,
+  totalPages,
+}) => (
+  <footer className='h-14 text-xs text-gray-500 flex flex-col justify-center px-2 border-t border-gray-100 bg-white/80'>
+    <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
+      <span className='font-semibold'>{katalyxInfo.name}</span>
+      <span>• {katalyxInfo.address}</span>
+      <span>
+        • Email:{' '}
+        <a href={`mailto:${katalyxInfo.email}`} className='underline'>
+          {katalyxInfo.email}
+        </a>
+      </span>
+    </div>
+    <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
+      <span>Téléphone: {katalyxInfo.phone}</span>
+      <span>• SIRET: {katalyxInfo.siret}</span>
+      <span>• TVA Intracommunautaire: {katalyxInfo.tva}</span>
+      <span className='ml-auto'>
+        Page {pageNumber} of {totalPages}
+      </span>
+    </div>
+  </footer>
+);
 
 interface ProposalPreviewProps {
   proposal: Proposal;
@@ -306,9 +343,16 @@ export default function ProposalPreview({
           >
             <div className='absolute inset-0 p-10 flex flex-col'>
               {/* Header */}
-              <div className='h-20 flex justify-between items-start'>
-                <div className='bg-katalyx-primary text-white text-lg font-bold py-2 px-4 rounded'>
-                  YourCompany
+              <div className='h-20 flex justify-between items-center'>
+                <div className='flex items-center'>
+                  <Image
+                    src='/katalyx-logo.png'
+                    alt='Katalyx Logo'
+                    width={120}
+                    height={40}
+                    className='object-contain'
+                    priority
+                  />
                 </div>
                 <div className='text-sm text-gray-500'>
                   <p>Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}</p>
@@ -330,9 +374,7 @@ export default function ProposalPreview({
               </div>
 
               {/* Footer */}
-              <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                <p>Page 1 of {totalPages}</p>
-              </div>
+              <KatalyxFooter pageNumber={1} totalPages={totalPages} />
             </div>
           </div>
 
@@ -348,27 +390,34 @@ export default function ProposalPreview({
                 }}
               >
                 <div className='absolute inset-0 p-10 flex flex-col'>
-                  {/* Header with Client Name */}
-                  <div className='h-20 flex justify-between items-start'>
-                    <div>
-                      <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                        Introduction
-                      </h2>
+                  {/* Header */}
+                  <div className='h-20 flex justify-between items-center'>
+                    <div className='flex items-center'>
+                      <Image
+                        src='/katalyx-logo.png'
+                        alt='Katalyx Logo'
+                        width={120}
+                        height={40}
+                        className='object-contain'
+                        priority
+                      />
                     </div>
-                    <div className='text-sm text-gray-600'>
-                      <p>For: {proposal.clientName}</p>
+                    <div className='text-sm text-gray-500'>
+                      <p>
+                        Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}
+                      </p>
                     </div>
                   </div>
+
                   {/* Content */}
                   <div className='flex-grow overflow-hidden'>
                     <div className='prose prose-gray max-w-none'>
                       <ReactMarkdown>{proposal.introduction}</ReactMarkdown>
                     </div>
                   </div>
+
                   {/* Footer */}
-                  <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                    <p>Page 2 of {totalPages}</p>
-                  </div>
+                  <KatalyxFooter pageNumber={2} totalPages={totalPages} />
                 </div>
               </div>
             </>
@@ -382,10 +431,20 @@ export default function ProposalPreview({
           >
             <div className='absolute inset-0 p-10 flex flex-col'>
               {/* Header */}
-              <div className='h-20'>
-                <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                  Table of Contents
-                </h2>
+              <div className='h-20 flex justify-between items-center'>
+                <div className='flex items-center'>
+                  <Image
+                    src='/katalyx-logo.png'
+                    alt='Katalyx Logo'
+                    width={120}
+                    height={40}
+                    className='object-contain'
+                    priority
+                  />
+                </div>
+                <div className='text-sm text-gray-500'>
+                  <p>Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}</p>
+                </div>
               </div>
 
               {/* ToC content */}
@@ -409,9 +468,7 @@ export default function ProposalPreview({
               </div>
 
               {/* Footer */}
-              <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                <p>Page 3 of {totalPages}</p>
-              </div>
+              <KatalyxFooter pageNumber={3} totalPages={totalPages} />
             </div>
           </div>
 
@@ -429,11 +486,23 @@ export default function ProposalPreview({
                   className={sectionIndex > 0 ? 'mt-12' : ''}
                 >
                   <div className='p-10'>
-                    {/* Header with section title */}
-                    <div className='h-20'>
-                      <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                        {sectionIndex + 1}. {section.title}
-                      </h2>
+                    {/* Header */}
+                    <div className='h-20 flex justify-between items-center'>
+                      <div className='flex items-center'>
+                        <Image
+                          src='/katalyx-logo.png'
+                          alt='Katalyx Logo'
+                          width={120}
+                          height={40}
+                          className='object-contain'
+                          priority
+                        />
+                      </div>
+                      <div className='text-sm text-gray-500'>
+                        <p>
+                          Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Section content with blocks */}
@@ -495,6 +564,12 @@ export default function ProposalPreview({
                           );
                         })}
                     </div>
+
+                    {/* Footer */}
+                    <KatalyxFooter
+                      pageNumber={4 + sectionIndex}
+                      totalPages={totalPages}
+                    />
                   </div>
                 </div>
               ))}
@@ -514,10 +589,20 @@ export default function ProposalPreview({
           >
             <div className='absolute inset-0 p-10 flex flex-col'>
               {/* Header */}
-              <div className='h-20'>
-                <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                  {proposal.sections.length + 1}. Project Timeline
-                </h2>
+              <div className='h-20 flex justify-between items-center'>
+                <div className='flex items-center'>
+                  <Image
+                    src='/katalyx-logo.png'
+                    alt='Katalyx Logo'
+                    width={120}
+                    height={40}
+                    className='object-contain'
+                    priority
+                  />
+                </div>
+                <div className='text-sm text-gray-500'>
+                  <p>Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}</p>
+                </div>
               </div>
 
               {/* Timeline content */}
@@ -546,34 +631,42 @@ export default function ProposalPreview({
                       </tr>
                     </thead>
                     <tbody>
-                      {calculateTimeline().map((item, index) => (
-                        <tr key={index} className='border-b border-gray-200'>
-                          <td className='py-3 px-2 font-medium'>
-                            {item.name}
-                            {item.description && (
-                              <div className='text-xs text-gray-500 font-normal mt-1'>
-                                {item.description}
-                              </div>
-                            )}
-                          </td>
-                          <td className='py-3 px-2'>Week {item.startWeek}</td>
-                          <td className='py-3 px-2'>Week {item.endWeek}</td>
-                          <td className='py-3 px-2 text-right'>
-                            {item.duration}{' '}
-                            {item.duration === 1 ? 'week' : 'weeks'} (
-                            {item.durationDays} days)
-                          </td>
-                        </tr>
-                      ))}
+                      {calculateTimeline()
+                        .filter(
+                          (item): item is NonNullable<typeof item> =>
+                            item !== null,
+                        )
+                        .map((item, index) => (
+                          <tr key={index} className='border-b border-gray-200'>
+                            <td className='py-3 px-2 font-medium'>
+                              {item.name}
+                              {item.description && (
+                                <div className='text-xs text-gray-500 font-normal mt-1'>
+                                  {item.description}
+                                </div>
+                              )}
+                            </td>
+                            <td className='py-3 px-2'>Week {item.startWeek}</td>
+                            <td className='py-3 px-2'>Week {item.endWeek}</td>
+                            <td className='py-3 px-2 text-right'>
+                              {item.duration}{' '}
+                              {item.duration === 1 ? 'week' : 'weeks'} (
+                              {item.durationDays} days)
+                            </td>
+                          </tr>
+                        ))}
                       <tr className='font-medium bg-gray-50'>
                         <td className='py-3 px-2'>Total Project Duration</td>
                         <td className='py-3 px-2'>Week 1</td>
                         <td className='py-3 px-2'>
                           Week{' '}
-                          {calculateTimeline().length > 0
-                            ? calculateTimeline()[
-                                calculateTimeline().length - 1
-                              ].endWeek
+                          {calculateTimeline().filter(Boolean).length > 0
+                            ? calculateTimeline()
+                                .filter(
+                                  (item): item is NonNullable<typeof item> =>
+                                    item !== null,
+                                )
+                                .slice(-1)[0]?.endWeek || 0
                             : 0}
                         </td>
                         <td className='py-3 px-2 text-right text-katalyx-primary'>
@@ -595,11 +688,10 @@ export default function ProposalPreview({
               </div>
 
               {/* Footer */}
-              <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                <p>
-                  Page {4 + proposal.sections.length} of {totalPages}
-                </p>
-              </div>
+              <KatalyxFooter
+                pageNumber={4 + proposal.sections.length}
+                totalPages={totalPages}
+              />
             </div>
           </div>
 
@@ -612,10 +704,20 @@ export default function ProposalPreview({
           >
             <div className='absolute inset-0 p-10 flex flex-col'>
               {/* Header */}
-              <div className='h-20'>
-                <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                  {proposal.sections.length + 2}. Budget Breakdown
-                </h2>
+              <div className='h-20 flex justify-between items-center'>
+                <div className='flex items-center'>
+                  <Image
+                    src='/katalyx-logo.png'
+                    alt='Katalyx Logo'
+                    width={120}
+                    height={40}
+                    className='object-contain'
+                    priority
+                  />
+                </div>
+                <div className='text-sm text-gray-500'>
+                  <p>Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}</p>
+                </div>
               </div>
 
               {/* Budget content */}
@@ -704,11 +806,10 @@ export default function ProposalPreview({
               </div>
 
               {/* Footer */}
-              <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                <p>
-                  Page {5 + proposal.sections.length} of {totalPages}
-                </p>
-              </div>
+              <KatalyxFooter
+                pageNumber={5 + proposal.sections.length}
+                totalPages={totalPages}
+              />
             </div>
           </div>
 
@@ -721,10 +822,20 @@ export default function ProposalPreview({
           >
             <div className='absolute inset-0 p-10 flex flex-col'>
               {/* Header */}
-              <div className='h-20'>
-                <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                  {proposal.sections.length + 3}. Payment Terms
-                </h2>
+              <div className='h-20 flex justify-between items-center'>
+                <div className='flex items-center'>
+                  <Image
+                    src='/katalyx-logo.png'
+                    alt='Katalyx Logo'
+                    width={120}
+                    height={40}
+                    className='object-contain'
+                    priority
+                  />
+                </div>
+                <div className='text-sm text-gray-500'>
+                  <p>Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}</p>
+                </div>
               </div>
 
               {/* Payment terms content */}
@@ -782,11 +893,10 @@ export default function ProposalPreview({
               </div>
 
               {/* Footer */}
-              <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                <p>
-                  Page {6 + proposal.sections.length} of {totalPages}
-                </p>
-              </div>
+              <KatalyxFooter
+                pageNumber={6 + proposal.sections.length}
+                totalPages={totalPages}
+              />
             </div>
           </div>
 
@@ -798,10 +908,20 @@ export default function ProposalPreview({
           >
             <div className='absolute inset-0 p-10 flex flex-col'>
               {/* Header */}
-              <div className='h-20'>
-                <h2 className='font-sora font-semibold text-2xl border-b border-gray-200 pb-3'>
-                  Contact Information
-                </h2>
+              <div className='h-20 flex justify-between items-center'>
+                <div className='flex items-center'>
+                  <Image
+                    src='/katalyx-logo.png'
+                    alt='Katalyx Logo'
+                    width={120}
+                    height={40}
+                    className='object-contain'
+                    priority
+                  />
+                </div>
+                <div className='text-sm text-gray-500'>
+                  <p>Reference: PROP-{proposal.id?.slice(-6).toUpperCase()}</p>
+                </div>
               </div>
 
               {/* Contact content */}
@@ -831,12 +951,10 @@ export default function ProposalPreview({
               </div>
 
               {/* Footer */}
-              <div className='h-10 text-xs text-gray-500 flex justify-center items-end'>
-                <p>
-                  Page {7 + proposal.sections.length} of{' '}
-                  {7 + proposal.sections.length}
-                </p>
-              </div>
+              <KatalyxFooter
+                pageNumber={7 + proposal.sections.length}
+                totalPages={totalPages}
+              />
             </div>
           </div>
         </div>
