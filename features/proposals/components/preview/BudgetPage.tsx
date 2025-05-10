@@ -42,8 +42,8 @@ export default function BudgetPage({
         <div className='flex-grow overflow-hidden'>
           <div className='mt-6'>
             <p className='text-gray-600 mb-6'>
-              The following table outlines the cost for each section of the
-              project:
+              Le tableau ci-dessous présente le coût de chaque section du projet
+              :
             </p>
             <div className='bg-gray-50 rounded-xl p-6 mb-8'>
               <table className='w-full text-left border-collapse'>
@@ -56,7 +56,7 @@ export default function BudgetPage({
                       Description
                     </th>
                     <th className='py-3 px-2 text-gray-700 font-medium text-right'>
-                      Subtotal
+                      Sous-total
                     </th>
                   </tr>
                 </thead>
@@ -110,10 +110,10 @@ export default function BudgetPage({
               </table>
             </div>
             <div className='text-sm text-gray-600 mt-4'>
-              <p>* All prices are in Euros and exclude applicable taxes.</p>
+              <p>* Tous les prix sont en euros et hors taxes applicables.</p>
               <p>
-                * Additional expenses may apply for travel, third-party
-                services, or licenses if required.
+                * Des frais supplémentaires peuvent s'appliquer pour les
+                déplacements, services tiers ou licences si nécessaire.
               </p>
             </div>
           </div>

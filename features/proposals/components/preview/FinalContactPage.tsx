@@ -23,17 +23,21 @@ export default function FinalContactPage() {
         <div className='flex-grow flex flex-col justify-center items-center'>
           <div className='text-center'>
             <div className='bg-katalyx-primary text-white text-lg font-bold py-2 px-4 rounded mb-6'>
-              YourCompany
+              VotreEntreprise
             </div>
-            <p className='text-gray-700 mb-2'>123 Business Avenue</p>
+            <p className='text-gray-700 mb-2'>123 Avenue des Affaires</p>
             <p className='text-gray-700 mb-6'>Tech City, TC 12345</p>
-            <p className='text-gray-700 mb-1'>Email: contact@yourcompany.com</p>
-            <p className='text-gray-700 mb-1'>Phone: +1 (555) 123-4567</p>
-            <p className='text-gray-700 mb-6'>Website: www.yourcompany.com</p>
+            <p className='text-gray-700 mb-1'>
+              Email : contact@votreentreprise.com
+            </p>
+            <p className='text-gray-700 mb-1'>Téléphone : +33 1 23 45 67 89</p>
+            <p className='text-gray-700 mb-6'>
+              Site web : www.votreentreprise.com
+            </p>
             <div className='w-20 h-1 bg-katalyx-primary my-6 mx-auto'></div>
             <p className='text-gray-600 italic'>
-              Thank you for considering our proposal. We look forward to
-              collaborating with you!
+              Merci d'avoir étudié notre proposition. Nous espérons collaborer
+              prochainement avec vous !
             </p>
           </div>
         </div>

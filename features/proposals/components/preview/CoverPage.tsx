@@ -37,11 +37,11 @@ export default function CoverPage({
             {title}
           </h1>
           <p className='text-xl text-gray-600 mb-8 text-center'>
-            Commercial Proposal for {clientName}
+            Proposition commerciale pour {clientName}
           </p>
           <div className='w-20 h-1 bg-katalyx-primary my-8'></div>
           <div className='text-gray-600 text-center'>
-            <p>Created on {formattedDate}</p>
+            <p>Créée le {formattedDate}</p>
           </div>
         </div>
       </div>

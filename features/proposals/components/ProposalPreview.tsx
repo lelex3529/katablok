@@ -151,7 +151,7 @@ export default function ProposalPreview({
     // Add special sections
     items.push({
       id: 'timeline',
-      title: 'Project Timeline',
+      title: 'Chronologie du projet',
       level: 1,
       number: `${sortedSections.length + 1}`,
       onClick: () => {
@@ -161,7 +161,7 @@ export default function ProposalPreview({
     });
     items.push({
       id: 'budget',
-      title: 'Budget Breakdown',
+      title: 'Détail du budget',
       level: 1,
       number: `${sortedSections.length + 2}`,
       onClick: () => {
@@ -171,7 +171,7 @@ export default function ProposalPreview({
     });
     items.push({
       id: 'payment',
-      title: 'Payment Terms',
+      title: 'Modalités de paiement',
       level: 1,
       number: `${sortedSections.length + 3}`,
       onClick: () => {
@@ -318,9 +318,11 @@ export default function ProposalPreview({
       {/* Preview header with controls */}
       <div className='sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center'>
         <div>
-          <h2 className='font-medium text-gray-900'>Proposal Preview</h2>
+          <h2 className='font-medium text-gray-900'>
+            Aperçu de la proposition
+          </h2>
           <p className='text-sm text-gray-500'>
-            Preview how your client will see this proposal
+            Aperçu de la proposition telle que votre client la verra
           </p>
         </div>
         <div className='flex items-center space-x-3'>
@@ -329,19 +331,19 @@ export default function ProposalPreview({
             className='px-4 py-2 flex items-center text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50'
           >
             <ArrowDownTrayIcon className='h-4 w-4 mr-2' />
-            Download PDF
+            Télécharger en PDF
           </button>
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
             className='p-2 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50'
-            title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            title={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
           >
             <ArrowsPointingOutIcon className='h-4 w-4' />
           </button>
           <button
             onClick={onClose}
             className='p-2 text-gray-500 hover:text-katalyx-error hover:bg-gray-50 rounded-lg'
-            title='Close preview'
+            title={"Fermer l'aperçu"}
           >
             <XMarkIcon className='h-5 w-5' />
           </button>

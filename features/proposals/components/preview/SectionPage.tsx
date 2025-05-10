@@ -66,17 +66,17 @@ export default function SectionPage({
                           !isNaN(blockDuration) && (
                             <div>
                               <span className='text-gray-500'>
-                                Estimated Duration:
+                                Durée estimée :
                               </span>
                               <span className='ml-2 font-medium'>
-                                {blockDuration} days
+                                {blockDuration} jours
                               </span>
                             </div>
                           )}
                         {typeof blockPrice === 'number' &&
                           !isNaN(blockPrice) && (
                             <div>
-                              <span className='text-gray-500'>Cost:</span>
+                              <span className='text-gray-500'>Coût :</span>
                               <span className='ml-2 font-medium'>
                                 {blockPrice?.toLocaleString()}€
                               </span>

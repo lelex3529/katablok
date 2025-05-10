@@ -38,21 +38,17 @@ export default function TimelinePage({
         <div className='flex-grow overflow-hidden'>
           <div className='mt-6'>
             <p className='text-gray-600 mb-6'>
-              The following table outlines the estimated timeline for completing
-              each phase of the project:
+              Le tableau ci-dessous présente le calendrier estimé pour chaque
+              phase du projet :
             </p>
             <table className='w-full text-left border-collapse mb-6'>
               <thead>
                 <tr className='border-b-2 border-gray-200'>
                   <th className='py-3 px-2 text-gray-700 font-medium'>Phase</th>
-                  <th className='py-3 px-2 text-gray-700 font-medium'>
-                    Start Week
-                  </th>
-                  <th className='py-3 px-2 text-gray-700 font-medium'>
-                    End Week
-                  </th>
+                  <th className='py-3 px-2 text-gray-700 font-medium'>Début</th>
+                  <th className='py-3 px-2 text-gray-700 font-medium'>Fin</th>
                   <th className='py-3 px-2 text-gray-700 font-medium text-right'>
-                    Duration
+                    Durée
                   </th>
                 </tr>
               </thead>
@@ -67,35 +63,37 @@ export default function TimelinePage({
                         </div>
                       )}
                     </td>
-                    <td className='py-3 px-2'>Week {item.startWeek}</td>
-                    <td className='py-3 px-2'>Week {item.endWeek}</td>
+                    <td className='py-3 px-2'>Semaine {item.startWeek}</td>
+                    <td className='py-3 px-2'>Semaine {item.endWeek}</td>
                     <td className='py-3 px-2 text-right'>
-                      {item.duration} {item.duration === 1 ? 'week' : 'weeks'} (
-                      {item.durationDays} days)
+                      {item.duration}{' '}
+                      {item.duration === 1 ? 'semaine' : 'semaines'} (
+                      {item.durationDays} jours)
                     </td>
                   </tr>
                 ))}
                 <tr className='font-medium bg-gray-50'>
-                  <td className='py-3 px-2'>Total Project Duration</td>
-                  <td className='py-3 px-2'>Week 1</td>
+                  <td className='py-3 px-2'>Durée totale du projet</td>
+                  <td className='py-3 px-2'>Semaine 1</td>
                   <td className='py-3 px-2'>
-                    Week{' '}
+                    Semaine{' '}
                     {timeline.length > 0
                       ? timeline[timeline.length - 1].endWeek
                       : 0}
                   </td>
                   <td className='py-3 px-2 text-right text-katalyx-primary'>
-                    {Math.ceil(totalDuration / 5)} weeks ({totalDuration} days)
+                    {Math.ceil(totalDuration / 5)} semaines ({totalDuration}{' '}
+                    jours)
                   </td>
                 </tr>
               </tbody>
             </table>
             <div className='text-sm text-gray-600 mt-4'>
               <p>
-                * This timeline is an estimate and may be adjusted based on
-                project requirements and dependencies.
+                * Ce calendrier est une estimation et peut être ajusté selon les
+                besoins et dépendances du projet.
               </p>
-              <p>* Each week represents 5 business days.</p>
+              <p>* Chaque semaine représente 5 jours ouvrés.</p>
             </div>
           </div>
         </div>

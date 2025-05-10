@@ -39,6 +39,9 @@ export default function TableOfContents({
         </div>
         <div className='flex-grow overflow-hidden'>
           <div className='mt-6 space-y-2'>
+            <h2 className='text-2xl font-sora font-bold mb-6'>
+              Table des matières
+            </h2>
             {tocItems.map((item) => (
               <div
                 key={item.id}
