@@ -5,13 +5,18 @@ import { useRouter } from 'next/navigation';
 import ProposalList from '@/features/proposals/components/ProposalList';
 import { getProposals } from '@/features/proposals/services/proposalService';
 import { Proposal } from '@/features/proposals/types/Proposal';
-import { PlusIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import {
+  PlusIcon,
+  DocumentTextIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline';
 
 export default function PropositionsPage() {
   const router = useRouter();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCreateOptions, setShowCreateOptions] = useState(false);
 
   const fetchProposals = async () => {
     try {
@@ -32,6 +37,15 @@ export default function PropositionsPage() {
   }, []);
 
   const handleCreateNew = () => {
+    // Show creation options dropdown
+    setShowCreateOptions(!showCreateOptions);
+  };
+
+  const handleCreateWithAI = () => {
+    router.push('/propositions/new/introduction');
+  };
+
+  const handleCreateManually = () => {
     router.push('/propositions/new');
   };
 
@@ -48,13 +62,44 @@ export default function PropositionsPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleCreateNew}
-          className='flex items-center px-5 py-2.5 bg-gradient-primary text-white rounded-xl hover:shadow-button-hover transition-shadow'
-        >
-          <PlusIcon className='h-5 w-5 mr-2' />
-          New Proposal
-        </button>
+        <div className='relative'>
+          <button
+            onClick={handleCreateNew}
+            className='flex items-center px-5 py-2.5 bg-gradient-primary text-white rounded-xl hover:shadow-button-hover transition-shadow'
+          >
+            <PlusIcon className='h-5 w-5 mr-2' />
+            New Proposal
+          </button>
+
+          {showCreateOptions && (
+            <div className='absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-xl border border-gray-200 py-2 z-10'>
+              <button
+                onClick={handleCreateWithAI}
+                className='flex items-center w-full text-left px-4 py-3 hover:bg-gray-50'
+              >
+                <SparklesIcon className='h-5 w-5 mr-3 text-katalyx-secondary' />
+                <div>
+                  <p className='font-medium'>With AI Introduction</p>
+                  <p className='text-xs text-gray-500'>
+                    Generate a professional intro with AI
+                  </p>
+                </div>
+              </button>
+              <button
+                onClick={handleCreateManually}
+                className='flex items-center w-full text-left px-4 py-3 hover:bg-gray-50'
+              >
+                <DocumentTextIcon className='h-5 w-5 mr-3 text-katalyx-primary' />
+                <div>
+                  <p className='font-medium'>From Scratch</p>
+                  <p className='text-xs text-gray-500'>
+                    Create a blank proposal
+                  </p>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Error display */}
@@ -93,12 +138,21 @@ export default function PropositionsPage() {
             for your clients.
           </p>
 
-          <button
-            onClick={handleCreateNew}
-            className='px-8 py-3 bg-gradient-primary text-white rounded-xl hover:shadow-button-hover transition-shadow'
-          >
-            Create Your First Proposal
-          </button>
+          <div className='flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4'>
+            <button
+              onClick={handleCreateWithAI}
+              className='px-8 py-3 flex items-center justify-center bg-gradient-primary text-white rounded-xl hover:shadow-button-hover transition-shadow'
+            >
+              <SparklesIcon className='h-5 w-5 mr-2' />
+              Create with AI Introduction
+            </button>
+            <button
+              onClick={handleCreateManually}
+              className='px-8 py-3 border-2 border-katalyx-primary text-katalyx-primary rounded-xl hover:bg-katalyx-primary/5 transition-colors'
+            >
+              Create from Scratch
+            </button>
+          </div>
         </div>
       )}
 

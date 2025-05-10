@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import ProposalBuilder from '@/features/proposals/components/ProposalBuilder';
 import { createProposal } from '@/features/proposals/services/proposalService';
 import { Proposal } from '@/features/proposals/types/Proposal';
@@ -11,6 +11,32 @@ export default function NewProposalPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [introText, setIntroText] = useState<string>('');
+  const [contextData, setContextData] = useState<any>(null);
+
+  // Load any AI-generated introduction from session storage
+  useEffect(() => {
+    // Get introduction text
+    const storedIntro = sessionStorage.getItem('proposal_introduction');
+    if (storedIntro) {
+      setIntroText(storedIntro);
+    }
+
+    // Get structured context
+    const storedContext = sessionStorage.getItem('proposal_context');
+    if (storedContext) {
+      try {
+        const contextObj = JSON.parse(storedContext);
+        setContextData(contextObj);
+      } catch (e) {
+        console.error('Failed to parse context data from session storage', e);
+      }
+    }
+
+    // Optional: clear sessionStorage after retrieving
+    // sessionStorage.removeItem('proposal_introduction');
+    // sessionStorage.removeItem('proposal_context');
+  }, []);
 
   // Handle proposal save
   const handleSaveProposal = async (
@@ -36,6 +62,12 @@ export default function NewProposalPage() {
     }
   };
 
+  // Get initial title and client name from context if available
+  const initialTitle = contextData?.projectName
+    ? `${contextData.projectName} Proposal`
+    : '';
+  const initialClientName = contextData?.clientName || '';
+
   return (
     <div className='space-y-8 pb-20'>
       {/* Header */}
@@ -58,7 +90,30 @@ export default function NewProposalPage() {
             </p>
           </div>
         </div>
+
+        {/* AI Introduction Button */}
+        <button
+          onClick={() => router.push('/propositions/new/introduction')}
+          className='flex items-center px-5 py-2.5 border-2 border-katalyx-secondary text-katalyx-secondary rounded-xl hover:bg-katalyx-secondary/5 transition-colors'
+        >
+          <SparklesIcon className='h-5 w-5 mr-2' />
+          New AI Introduction
+        </button>
       </div>
+
+      {/* AI-generated intro badge */}
+      {introText && (
+        <div className='bg-katalyx-secondary/10 text-katalyx-secondary p-4 rounded-xl border border-katalyx-secondary/20 flex items-start space-x-3'>
+          <SparklesIcon className='h-5 w-5 mt-0.5' />
+          <div>
+            <h3 className='font-medium'>AI-generated introduction added</h3>
+            <p className='text-sm'>
+              An introduction paragraph has been generated and added as the
+              first section of your proposal.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Error display */}
       {error && (
@@ -73,6 +128,9 @@ export default function NewProposalPage() {
         <ProposalBuilder
           onSave={handleSaveProposal}
           isSubmitting={isSubmitting}
+          introductionText={introText}
+          initialClientName={initialClientName}
+          initialTitle={initialTitle}
         />
       </div>
 

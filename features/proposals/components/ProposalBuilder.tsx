@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useProposalDraft } from '../hooks/useProposals';
 import { Proposal, PaymentTerm } from '../types/Proposal';
 import SectionEditor from './SectionEditor';
+import IntroductionBlock from './IntroductionBlock';
 import {
   PlusIcon,
   DocumentTextIcon,
@@ -33,12 +34,18 @@ interface ProposalBuilderProps {
   ) => Promise<Proposal>;
   initialProposal?: Partial<Proposal>;
   isSubmitting?: boolean;
+  introductionText?: string;
+  initialClientName?: string;
+  initialTitle?: string;
 }
 
 export default function ProposalBuilder({
   onSave,
   initialProposal,
   isSubmitting = false,
+  introductionText = '',
+  initialClientName = '',
+  initialTitle = '',
 }: ProposalBuilderProps) {
   const {
     draft,
@@ -59,6 +66,9 @@ export default function ProposalBuilder({
     updateDraft,
   } = useProposalDraft();
 
+  const [introContent, setIntroContent] = useState(introductionText);
+  const [showIntroductionBlock, setShowIntroductionBlock] =
+    useState(!!introductionText);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -71,6 +81,40 @@ export default function ProposalBuilder({
 
   const isInitialized = useRef(false);
 
+  // Create an introduction section with the provided text if available
+  const initializeWithIntroduction = useCallback(() => {
+    if (introductionText && !isInitialized.current) {
+      // Apply initial values if provided
+      if (initialClientName) {
+        updateProperty('clientName', initialClientName);
+      }
+      if (initialTitle) {
+        updateProperty('title', initialTitle);
+      }
+
+      // Set the introduction content state
+      setIntroContent(introductionText);
+      setShowIntroductionBlock(true);
+
+      // No need to create a section and block now since we'll display a dedicated introduction block
+      // Instead, we'll store the introduction in metadata
+      updateProperty('metadata', {
+        ...draft.metadata,
+        introduction: introductionText,
+      });
+
+      markAsSaved();
+      isInitialized.current = true;
+    }
+  }, [
+    introductionText,
+    initialClientName,
+    initialTitle,
+    updateProperty,
+    markAsSaved,
+    draft.metadata,
+  ]);
+
   // Initialize with initialProposal if provided
   useEffect(() => {
     if (initialProposal && !isInitialized.current) {
@@ -81,6 +125,13 @@ export default function ProposalBuilder({
       } as Proposal;
 
       updateDraft(proposalToEdit);
+
+      // Check if proposal has an introduction in metadata
+      if (initialProposal.metadata?.introduction) {
+        setIntroContent(initialProposal.metadata.introduction);
+        setShowIntroductionBlock(true);
+      }
+
       markAsSaved();
       isInitialized.current = true;
 
@@ -88,8 +139,31 @@ export default function ProposalBuilder({
       if (initialProposal.paymentTerms) {
         setSelectedPaymentTerms(initialProposal.paymentTerms);
       }
+    } else if (introductionText && !isInitialized.current) {
+      // If no initial proposal but we have introduction text
+      initializeWithIntroduction();
     }
-  }, [initialProposal, markAsSaved, updateDraft]);
+  }, [
+    initialProposal,
+    markAsSaved,
+    updateDraft,
+    introductionText,
+    initializeWithIntroduction,
+  ]);
+
+  // Handle introduction content update
+  const handleUpdateIntroduction = (newContent: string) => {
+    setIntroContent(newContent);
+    updateProperty('metadata', {
+      ...draft.metadata,
+      introduction: newContent,
+    });
+  };
+
+  // Toggle introduction block visibility
+  const toggleIntroductionBlock = () => {
+    setShowIntroductionBlock(!showIntroductionBlock);
+  };
 
   // Update payment terms in draft when they change - but only if they're really different
   useEffect(() => {
@@ -120,6 +194,10 @@ export default function ProposalBuilder({
           title: draft.title,
           clientName: draft.clientName,
           paymentTerms: selectedPaymentTerms,
+          metadata: {
+            ...draft.metadata,
+            introduction: showIntroductionBlock ? introContent : null,
+          },
           sections: draft.sections.map((section) => ({
             ...section,
             blocks: section.blocks.map((block) => ({
@@ -152,7 +230,14 @@ export default function ProposalBuilder({
         setIsSaving(false);
       }
     }
-  }, [onSave, draft, markAsSaved, selectedPaymentTerms]);
+  }, [
+    onSave,
+    draft,
+    markAsSaved,
+    selectedPaymentTerms,
+    showIntroductionBlock,
+    introContent,
+  ]);
 
   // Select payment terms
   const selectPaymentTerms = (terms: PaymentTerm[]) => {
@@ -274,6 +359,35 @@ export default function ProposalBuilder({
         </div>
       )}
 
+      {/* Introduction Block */}
+      <div className='mb-8'>
+        <div className='flex justify-between items-center mb-4'>
+          <h2 className='text-lg font-medium'>Proposal Introduction</h2>
+          <button
+            onClick={toggleIntroductionBlock}
+            className='text-sm px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50'
+          >
+            {showIntroductionBlock ? 'Hide Introduction' : 'Show Introduction'}
+          </button>
+        </div>
+
+        {showIntroductionBlock && (
+          <IntroductionBlock
+            content={introContent}
+            onUpdate={handleUpdateIntroduction}
+          />
+        )}
+
+        {!showIntroductionBlock && !introContent && (
+          <div className='bg-gray-50 p-4 rounded-xl border border-gray-200 text-center'>
+            <p className='text-gray-500 text-sm'>
+              The introduction is hidden. Click 'Show Introduction' to add an
+              introduction paragraph to your proposal.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Sections */}
       <div className='mb-8'>
         <h2 className='text-lg font-medium mb-4'>Proposal Sections</h2>
@@ -304,7 +418,7 @@ export default function ProposalBuilder({
               Your proposal is empty. Create your first section to get started.
             </p>
             <button
-              onClick={() => addSection('Introduction')}
+              onClick={() => addSection('First Section')}
               className='px-6 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors'
             >
               Create First Section
@@ -426,6 +540,11 @@ export default function ProposalBuilder({
                   )}{' '}
                   blocks
                 </span>
+                {showIntroductionBlock && (
+                  <span className='px-2 py-1 bg-katalyx-secondary/10 border border-katalyx-secondary/30 text-katalyx-secondary rounded-md text-sm'>
+                    + Introduction
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -511,6 +630,10 @@ export default function ProposalBuilder({
               updatedAt: draft.updatedAt || new Date().toISOString(),
               status: draft.status || 'draft',
               paymentTerms: selectedPaymentTerms,
+              metadata: {
+                ...draft.metadata,
+                introduction: showIntroductionBlock ? introContent : null,
+              },
             }}
             onClose={closePreview}
           />
