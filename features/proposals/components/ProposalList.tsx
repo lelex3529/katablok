@@ -26,7 +26,6 @@ export default function ProposalList({
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Update local state when props change
   useEffect(() => {
@@ -107,7 +106,6 @@ export default function ProposalList({
   // Handle deleting a proposal
   const handleDelete = async (id: string) => {
     try {
-      setIsDeleting(true);
       await deleteProposal(id);
       // Update local state
       setProposals(proposals.filter((proposal) => proposal.id !== id));
@@ -118,8 +116,6 @@ export default function ProposalList({
     } catch (error) {
       console.error('Error deleting proposal:', error);
       // Could add toast notification here
-    } finally {
-      setIsDeleting(false);
     }
   };
 

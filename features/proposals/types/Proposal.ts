@@ -1,5 +1,5 @@
 // Proposal type definitions
-import { Block } from "@/features/blocks/types/Block";
+import { Block } from '@/features/blocks/types/Block';
 
 export interface PaymentTerm {
   label: string;
@@ -9,7 +9,7 @@ export interface PaymentTerm {
 
 export interface ProposalBlock {
   id: string;
-  blockId: string;  // refers to a Block
+  blockId: string; // refers to a Block
   order: number;
   sectionId?: string;
   block?: Block;
@@ -31,7 +31,7 @@ export interface ProposalBlock {
 export interface ProposalSection {
   id: string;
   title: string;
-  order: number;    // for sorting within a proposal
+  order: number; // for sorting within a proposal
   proposalId?: string;
   blocks: ProposalBlock[];
   createdAt?: Date;
@@ -49,4 +49,13 @@ export interface Proposal {
   status?: string;
   sections: ProposalSection[];
   paymentTerms?: PaymentTerm[];
+  introduction?: string; // Optional introduction paragraph
+  context?: string; // Optional project context
+}
+
+export interface ProposalStructuredContext {
+  clientName: string;
+  projectName: string;
+  objectives: string[];
+  tone: string;
 }

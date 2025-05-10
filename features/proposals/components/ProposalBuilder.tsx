@@ -37,6 +37,7 @@ interface ProposalBuilderProps {
   introductionText?: string;
   initialClientName?: string;
   initialTitle?: string;
+  initialContext?: string; // NEW: for structured context
 }
 
 export default function ProposalBuilder({
@@ -46,6 +47,7 @@ export default function ProposalBuilder({
   introductionText = '',
   initialClientName = '',
   initialTitle = '',
+  initialContext = undefined,
 }: ProposalBuilderProps) {
   const {
     draft,
@@ -78,6 +80,7 @@ export default function ProposalBuilder({
     PaymentTerm[]
   >(initialProposal?.paymentTerms || DEFAULT_PAYMENT_TERMS[0]);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [showContextPanel, setShowContextPanel] = useState(false);
 
   const isInitialized = useRef(false);
 
@@ -96,12 +99,8 @@ export default function ProposalBuilder({
       setIntroContent(introductionText);
       setShowIntroductionBlock(true);
 
-      // No need to create a section and block now since we'll display a dedicated introduction block
-      // Instead, we'll store the introduction in metadata
-      updateProperty('metadata', {
-        ...draft.metadata,
-        introduction: introductionText,
-      });
+      // Store the introduction as a top-level property
+      updateProperty('introduction', introductionText);
 
       markAsSaved();
       isInitialized.current = true;
@@ -112,7 +111,6 @@ export default function ProposalBuilder({
     initialTitle,
     updateProperty,
     markAsSaved,
-    draft.metadata,
   ]);
 
   // Initialize with initialProposal if provided
@@ -126,9 +124,9 @@ export default function ProposalBuilder({
 
       updateDraft(proposalToEdit);
 
-      // Check if proposal has an introduction in metadata
-      if (initialProposal.metadata?.introduction) {
-        setIntroContent(initialProposal.metadata.introduction);
+      // Check if proposal has an introduction
+      if (initialProposal.introduction) {
+        setIntroContent(initialProposal.introduction);
         setShowIntroductionBlock(true);
       }
 
@@ -151,13 +149,18 @@ export default function ProposalBuilder({
     initializeWithIntroduction,
   ]);
 
+  // Set context from initialContext if provided and not already set
+  useEffect(() => {
+    if (initialContext && !draft.context) {
+      updateProperty('context', initialContext);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialContext]);
+
   // Handle introduction content update
   const handleUpdateIntroduction = (newContent: string) => {
     setIntroContent(newContent);
-    updateProperty('metadata', {
-      ...draft.metadata,
-      introduction: newContent,
-    });
+    updateProperty('introduction', newContent);
   };
 
   // Toggle introduction block visibility
@@ -194,10 +197,7 @@ export default function ProposalBuilder({
           title: draft.title,
           clientName: draft.clientName,
           paymentTerms: selectedPaymentTerms,
-          metadata: {
-            ...draft.metadata,
-            introduction: showIntroductionBlock ? introContent : null,
-          },
+          introduction: showIntroductionBlock ? introContent : '',
           sections: draft.sections.map((section) => ({
             ...section,
             blocks: section.blocks.map((block) => ({
@@ -349,6 +349,50 @@ export default function ProposalBuilder({
             placeholder='Enter client name'
           />
         </div>
+
+        {/* Project Context Panel (Structured JSON) */}
+        <div className='relative'>
+          <button
+            type='button'
+            className='text-sm px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 mb-2'
+            onClick={() => setShowContextPanel((v) => !v)}
+          >
+            {showContextPanel ? 'Hide Project Context' : 'Show Project Context'}
+          </button>
+          {showContextPanel && (
+            <div className='bg-gray-50 p-4 rounded-xl border border-gray-200 mt-2'>
+              <label
+                htmlFor='project-context-json'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
+                Project Context (Structured JSON)
+              </label>
+              <textarea
+                id='project-context-json'
+                value={(() => {
+                  try {
+                    return draft.context
+                      ? JSON.stringify(JSON.parse(draft.context), null, 2)
+                      : '{\n  "clientName": "",\n  "projectName": "",\n  "objectives": [],\n  "tone": ""\n}';
+                  } catch {
+                    return draft.context || '';
+                  }
+                })()}
+                onChange={(e) => {
+                  updateProperty('context', e.target.value);
+                }}
+                rows={8}
+                className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-katalyx-primary focus:border-katalyx-primary font-mono text-sm'
+                placeholder='Paste or edit the structured context JSON here.'
+              />
+              <p className='text-xs text-gray-500 mt-2'>
+                This context is used for AI-assisted features and can be edited
+                as JSON. Example:{' '}
+                {`{"clientName": "Acme Corp", "projectName": "Website Redesign", "objectives": ["Modernize UI"], "tone": "Professional"}`}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Unsaved changes alert */}
@@ -381,8 +425,8 @@ export default function ProposalBuilder({
         {!showIntroductionBlock && !introContent && (
           <div className='bg-gray-50 p-4 rounded-xl border border-gray-200 text-center'>
             <p className='text-gray-500 text-sm'>
-              The introduction is hidden. Click 'Show Introduction' to add an
-              introduction paragraph to your proposal.
+              The introduction is hidden. Click &apos;Show Introduction&apos; to
+              add an introduction paragraph to your proposal.
             </p>
           </div>
         )}
@@ -630,10 +674,7 @@ export default function ProposalBuilder({
               updatedAt: draft.updatedAt || new Date().toISOString(),
               status: draft.status || 'draft',
               paymentTerms: selectedPaymentTerms,
-              metadata: {
-                ...draft.metadata,
-                introduction: showIntroductionBlock ? introContent : null,
-              },
+              introduction: showIntroductionBlock ? introContent : '',
             }}
             onClose={closePreview}
           />

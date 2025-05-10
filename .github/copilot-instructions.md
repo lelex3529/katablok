@@ -1,6 +1,6 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
-This is a Next.js 14 project using the App Router, TypeScript, and Tailwind CSS. The project aims to be a SaaS application named "Katalyx Proposals" for generating commercial proposals.
+This is a Next.js 15 project using the App Router, TypeScript, and Tailwind CSS. The project aims to be a SaaS application named "Katalyx Proposals" for generating commercial proposals.
 
 Key architectural considerations:
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PencilIcon, EyeIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import ReactMarkdown from 'react-markdown';
 import { useRouter } from 'next/navigation';
 

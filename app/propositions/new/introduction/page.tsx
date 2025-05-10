@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import ProposalIntroductionAssistant from '@/features/proposals/components/ProposalIntroductionAssistant';
+import { ProposalStructuredContext } from '@/features/proposals/types/Proposal';
 
 export default function ProposalIntroductionPage() {
   const router = useRouter();
 
   // This function will be called when the introduction is generated and the user clicks "Use This Introduction"
-  const handleIntroductionGenerated = (introduction: string, context: any) => {
+  const handleIntroductionGenerated = (
+    introduction: string,
+    context: ProposalStructuredContext,
+  ) => {
     // Store the generated introduction in localStorage or sessionStorage
     // so we can retrieve it when creating the proposal
     sessionStorage.setItem('proposal_introduction', introduction);

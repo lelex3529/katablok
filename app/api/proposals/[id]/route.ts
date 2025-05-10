@@ -1,22 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { ProposalSection, ProposalBlock, PaymentTerm } from '@/features/proposals/types/Proposal';
+import {
+  ProposalSection,
+  ProposalBlock,
+  PaymentTerm,
+} from '@/features/proposals/types/Proposal';
 import { Prisma } from '@prisma/client';
 
 // Define a proper type for the Proposal metadata
 interface ProposalMetadata {
   paymentTerms?: PaymentTerm[];
-  [key: string]: unknown;  // Allow for additional metadata properties
+  [key: string]: unknown; // Allow for additional metadata properties
+}
+
+// Helper to extract id from the URL
+function getIdFromRequest(request: NextRequest): string | null {
+  const url = request.nextUrl || new URL(request.url);
+  const segments = url.pathname.split('/');
+  const id = segments[segments.length - 1] || null;
+  return id;
 }
 
 // GET /api/proposals/[id] - Get a single proposal
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = params;
-    
+    const id = getIdFromRequest(request);
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Proposal ID is required' },
+        { status: 400 },
+      );
+    }
     const proposal = await prisma.proposal.findUnique({
       where: { id },
       include: {
@@ -41,7 +55,7 @@ export async function GET(
     if (!proposal) {
       return NextResponse.json(
         { error: 'Proposal not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -56,47 +70,50 @@ export async function GET(
     console.error('Error fetching proposal:', error);
     return NextResponse.json(
       { error: 'Failed to fetch proposal' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // PUT /api/proposals/[id] - Update a proposal
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
-    const { id } = params;
+    const id = getIdFromRequest(request);
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Proposal ID is required' },
+        { status: 400 },
+      );
+    }
     const data = await request.json();
-    
+
     // Validate required fields
     const requiredFields = ['title', 'clientName', 'sections'];
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
           { error: `${field} is required` },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
-    
+
     // Check if proposal exists
     const existingProposal = await prisma.proposal.findUnique({
       where: { id },
       include: {
         sections: {
           include: {
-            blocks: true
-          }
-        }
-      }
+            blocks: true,
+          },
+        },
+      },
     });
 
     if (!existingProposal) {
       return NextResponse.json(
         { error: 'Proposal not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -110,14 +127,16 @@ export async function PUT(
           clientName: data.clientName,
           // Store payment terms in the metadata column
           metadata: {
-            paymentTerms: data.paymentTerms || []
-          }
+            paymentTerms: data.paymentTerms || [],
+          },
         },
       });
 
       // 2. Handle sections: delete those not in the updated data
-      const newSectionIds = data.sections.map((section: Partial<ProposalSection>) => section.id).filter(Boolean);
-      
+      const newSectionIds = data.sections
+        .map((section: Partial<ProposalSection>) => section.id)
+        .filter(Boolean);
+
       // Delete sections that are not in the updated sections array
       await tx.proposalSection.deleteMany({
         where: {
@@ -139,15 +158,18 @@ export async function PUT(
               order: section.order as number,
               proposalId: id,
               blocks: {
-                create: section.blocks?.map((block: Partial<ProposalBlock>, blockIndex: number) => ({
-                  blockId: block.blockId as string,
-                  order: block.order || blockIndex,
-                  overrideTitle: block.overrides?.title,
-                  overrideContent: block.overrides?.content,
-                  overrideUnitPrice: block.overrides?.unitPrice,
-                  overrideDuration: block.overrides?.estimatedDuration
-                })) || []
-              }
+                create:
+                  section.blocks?.map(
+                    (block: Partial<ProposalBlock>, blockIndex: number) => ({
+                      blockId: block.blockId as string,
+                      order: block.order || blockIndex,
+                      overrideTitle: block.overrides?.title,
+                      overrideContent: block.overrides?.content,
+                      overrideUnitPrice: block.overrides?.unitPrice,
+                      overrideDuration: block.overrides?.estimatedDuration,
+                    }),
+                  ) || [],
+              },
             },
           });
         } else if (section.id) {
@@ -161,8 +183,11 @@ export async function PUT(
           });
 
           // 4. Handle blocks in this section
-          const newBlockIds = (section.blocks?.map((block: Partial<ProposalBlock>) => block.id).filter((id): id is string => id !== undefined) || []);
-          
+          const newBlockIds =
+            section.blocks
+              ?.map((block: Partial<ProposalBlock>) => block.id)
+              .filter((id): id is string => id !== undefined) || [];
+
           // Delete blocks that are not in the updated blocks array
           await tx.proposalBlock.deleteMany({
             where: {
@@ -186,7 +211,7 @@ export async function PUT(
                   overrideTitle: block.overrides?.title,
                   overrideContent: block.overrides?.content,
                   overrideUnitPrice: block.overrides?.unitPrice,
-                  overrideDuration: block.overrides?.estimatedDuration
+                  overrideDuration: block.overrides?.estimatedDuration,
                 },
               });
             } else if (block.id) {
@@ -198,7 +223,7 @@ export async function PUT(
                   overrideTitle: block.overrides?.title,
                   overrideContent: block.overrides?.content,
                   overrideUnitPrice: block.overrides?.unitPrice,
-                  overrideDuration: block.overrides?.estimatedDuration
+                  overrideDuration: block.overrides?.estimatedDuration,
                 },
               });
             }
@@ -240,19 +265,22 @@ export async function PUT(
     console.error('Error updating proposal:', error);
     return NextResponse.json(
       { error: 'Failed to update proposal' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // DELETE /api/proposals/[id] - Delete a proposal
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
-    const { id } = params;
-    
+    const id = getIdFromRequest(request);
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Proposal ID is required' },
+        { status: 400 },
+      );
+    }
+
     // Check if proposal exists
     const proposal = await prisma.proposal.findUnique({
       where: { id },
@@ -261,7 +289,7 @@ export async function DELETE(
     if (!proposal) {
       return NextResponse.json(
         { error: 'Proposal not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -269,13 +297,13 @@ export async function DELETE(
     await prisma.proposal.delete({
       where: { id },
     });
-    
+
     return NextResponse.json({ message: 'Proposal deleted successfully' });
   } catch (error) {
     console.error('Error deleting proposal:', error);
     return NextResponse.json(
       { error: 'Failed to delete proposal' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -9,20 +9,19 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowPathIcon } from '@heroicons/react/24/solid';
 import ReactMarkdown from 'react-markdown';
+import { ProposalStructuredContext } from '@/features/proposals/types/Proposal';
 
 interface ProposalIntroductionAssistantProps {
-  onIntroductionGenerated: (introduction: string, context: any) => void;
+  onIntroductionGenerated: (
+    introduction: string,
+    context: ProposalStructuredContext,
+  ) => void;
   onSkip?: () => void;
 }
 
 interface GeneratedContent {
   introduction: string;
-  structuredContext: {
-    clientName: string;
-    projectName: string;
-    objectives: string[];
-    tone: string;
-  };
+  structuredContext: ProposalStructuredContext;
 }
 
 export default function ProposalIntroductionAssistant({

@@ -6,13 +6,15 @@ import { ArrowLeftIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import ProposalBuilder from '@/features/proposals/components/ProposalBuilder';
 import { createProposal } from '@/features/proposals/services/proposalService';
 import { Proposal } from '@/features/proposals/types/Proposal';
+import { ProposalStructuredContext } from '@/features/proposals/types/Proposal';
 
 export default function NewProposalPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [introText, setIntroText] = useState<string>('');
-  const [contextData, setContextData] = useState<any>(null);
+  const [contextData, setContextData] =
+    useState<ProposalStructuredContext | null>(null);
 
   // Load any AI-generated introduction from session storage
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function NewProposalPage() {
     const storedContext = sessionStorage.getItem('proposal_context');
     if (storedContext) {
       try {
-        const contextObj = JSON.parse(storedContext);
+        const contextObj: ProposalStructuredContext = JSON.parse(storedContext);
         setContextData(contextObj);
       } catch (e) {
         console.error('Failed to parse context data from session storage', e);
@@ -131,6 +133,7 @@ export default function NewProposalPage() {
           introductionText={introText}
           initialClientName={initialClientName}
           initialTitle={initialTitle}
+          initialContext={contextData ? JSON.stringify(contextData) : undefined}
         />
       </div>
 
