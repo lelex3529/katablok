@@ -59,3 +59,12 @@ export interface ProposalStructuredContext {
   objectives: string[];
   tone: string;
 }
+
+export interface TimelineItem {
+  name: string;
+  description: string;
+  startWeek: number;
+  endWeek: number;
+  duration: number;
+  durationDays: number;
+}
