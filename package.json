@@ -11,10 +11,13 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.7.0",
+    "@types/puppeteer": "^7.0.4",
     "@types/uuid": "^10.0.0",
+    "jspdf": "^3.0.1",
     "next": "^15.3.2",
     "openai": "^4.98.0",
     "prisma": "^6.7.0",
+    "puppeteer": "^24.8.2",
     "react": "^19.0.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

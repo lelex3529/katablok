@@ -39,6 +39,7 @@ export default function ProposalPreview({
   const [tocItems, setTocItems] = useState<TocComponentItem[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [totalPages, setTotalPages] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Calculate totals
   const totalDuration = proposal.sections.reduce((total, section) => {
@@ -199,10 +200,27 @@ export default function ProposalPreview({
     setTotalPages(baseCount + 1 + specialPagesCount);
   }, [proposal.sections, proposal.introduction]);
 
-  // Handle download (placeholder for now)
+  // Handle download PDF
   const handleDownload = () => {
-    // This would be implemented with a PDF generation service
-    alert('Download functionality will be implemented with PDF generation');
+    if (!proposal.id || proposal.id === 'preview') {
+      alert('Veuillez d\'abord enregistrer cette proposition avant de la télécharger.');
+      return;
+    }
+
+    // Show loading UI
+    setIsDownloading(true);
+
+    // Create an invisible iframe to trigger the download
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = `/api/proposals/${proposal.id}/pdf`;
+    document.body.appendChild(iframe);
+
+    // Clean up after download starts
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      setIsDownloading(false);
+    }, 2000);
   };
 
   // Calculate project timeline
