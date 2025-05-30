@@ -203,7 +203,9 @@ export default function ProposalPreview({
   // Handle download PDF
   const handleDownload = () => {
     if (!proposal.id || proposal.id === 'preview') {
-      alert('Veuillez d\'abord enregistrer cette proposition avant de la télécharger.');
+      alert(
+        "Veuillez d'abord enregistrer cette proposition avant de la télécharger.",
+      );
       return;
     }
 

@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   DocumentPlusIcon,
@@ -6,49 +8,12 @@ import {
   DocumentTextIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
+import { useDashboardData } from '@/features/proposals/hooks/useDashboardData';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 // Types pour les données de proposition
 type PropositionStatus = 'draft' | 'sent' | 'signed';
-
-interface Proposition {
-  id: string;
-  title: string;
-  client: string;
-  date: string;
-  status: PropositionStatus;
-}
-
-// Données de test pour les propositions récentes
-const recentPropositions: Proposition[] = [
-  {
-    id: '1',
-    title: 'Refonte site e-commerce',
-    client: 'Acme Inc.',
-    date: '15 avril 2025',
-    status: 'draft',
-  },
-  {
-    id: '2',
-    title: 'Développement application mobile',
-    client: 'Globex Corporation',
-    date: '10 avril 2025',
-    status: 'sent',
-  },
-  {
-    id: '3',
-    title: "Solution d'analyse de données",
-    client: 'Initech',
-    date: '5 avril 2025',
-    status: 'signed',
-  },
-  {
-    id: '4',
-    title: 'Mise en place CRM',
-    client: 'Massive Dynamic',
-    date: '1 avril 2025',
-    status: 'draft',
-  },
-];
 
 // Fonction pour obtenir le badge approprié en fonction du statut
 const getStatusBadge = (status: PropositionStatus) => {
@@ -81,6 +46,26 @@ const getStatusBadge = (status: PropositionStatus) => {
 };
 
 export default function Dashboard() {
+  const {
+    totalProposals,
+    pendingProposals,
+    signedProposals,
+    recentProposals,
+    loading,
+    error,
+  } = useDashboardData();
+
+  // Format date for display
+  const formatDate = (dateString: string | Date) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, 'd MMMM yyyy', { locale: fr });
+    } catch (e) {
+      console.error('Date formatting error:', e);
+      return 'Date invalide';
+    }
+  };
+
   return (
     <div className='space-y-12 relative'>
       {/* En-tête */}
@@ -114,7 +99,9 @@ export default function Dashboard() {
               <h2 className='text-lg font-semibold text-katalyx-text font-sora'>
                 Total Propositions
               </h2>
-              <p className='text-3xl font-bold text-katalyx-text mt-1'>12</p>
+              <p className='text-3xl font-bold text-katalyx-text mt-1'>
+                {loading ? '...' : totalProposals}
+              </p>
             </div>
           </div>
         </div>
@@ -127,7 +114,9 @@ export default function Dashboard() {
               <h2 className='text-lg font-semibold text-katalyx-text font-sora'>
                 En attente
               </h2>
-              <p className='text-3xl font-bold text-katalyx-text mt-1'>5</p>
+              <p className='text-3xl font-bold text-katalyx-text mt-1'>
+                {loading ? '...' : pendingProposals}
+              </p>
             </div>
           </div>
         </div>
@@ -140,7 +129,9 @@ export default function Dashboard() {
               <h2 className='text-lg font-semibold text-katalyx-text font-sora'>
                 Signées
               </h2>
-              <p className='text-3xl font-bold text-katalyx-text mt-1'>3</p>
+              <p className='text-3xl font-bold text-katalyx-text mt-1'>
+                {loading ? '...' : signedProposals}
+              </p>
             </div>
           </div>
         </div>
@@ -161,77 +152,94 @@ export default function Dashboard() {
         </div>
         <div className='overflow-hidden'>
           <div className='overflow-x-auto'>
-            <table className='min-w-full divide-y divide-gray-200'>
-              <thead>
-                <tr>
-                  <th
-                    scope='col'
-                    className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
-                  >
-                    Titre
-                  </th>
-                  <th
-                    scope='col'
-                    className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
-                  >
-                    Client
-                  </th>
-                  <th
-                    scope='col'
-                    className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
-                  >
-                    Date
-                  </th>
-                  <th
-                    scope='col'
-                    className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
-                  >
-                    Statut
-                  </th>
-                  <th
-                    scope='col'
-                    className='px-6 py-3 text-right text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='bg-white divide-y divide-gray-100'>
-                {recentPropositions.map((proposition) => (
-                  <tr
-                    key={proposition.id}
-                    className='hover:bg-katalyx-off-white transition-colors'
-                  >
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='text-sm font-medium text-katalyx-text'>
-                        {proposition.title}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='text-sm text-katalyx-neutral-gray'>
-                        {proposition.client}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='text-sm text-katalyx-neutral-gray'>
-                        {proposition.date}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      {getStatusBadge(proposition.status)}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-right'>
-                      <Link
-                        href={`/propositions/${proposition.id}`}
-                        className='text-katalyx-primary hover:text-katalyx-primary-light font-medium hover:underline transition-colors'
-                      >
-                        Voir
-                      </Link>
-                    </td>
+            {loading ? (
+              <div className='text-center py-8 text-katalyx-neutral-gray'>
+                Chargement des propositions...
+              </div>
+            ) : error ? (
+              <div className='text-center py-8 text-katalyx-error'>
+                Erreur lors du chargement des données: {error}
+              </div>
+            ) : recentProposals.length === 0 ? (
+              <div className='text-center py-8 text-katalyx-neutral-gray'>
+                Aucune proposition pour le moment. Créez votre première
+                proposition !
+              </div>
+            ) : (
+              <table className='min-w-full divide-y divide-gray-200'>
+                <thead>
+                  <tr>
+                    <th
+                      scope='col'
+                      className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
+                    >
+                      Titre
+                    </th>
+                    <th
+                      scope='col'
+                      className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
+                    >
+                      Client
+                    </th>
+                    <th
+                      scope='col'
+                      className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
+                    >
+                      Date
+                    </th>
+                    <th
+                      scope='col'
+                      className='px-6 py-3 text-left text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
+                    >
+                      Statut
+                    </th>
+                    <th
+                      scope='col'
+                      className='px-6 py-3 text-right text-xs font-medium text-katalyx-neutral-gray uppercase tracking-wider'
+                    >
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className='bg-white divide-y divide-gray-100'>
+                  {recentProposals.map((proposal) => (
+                    <tr
+                      key={proposal.id}
+                      className='hover:bg-katalyx-off-white transition-colors'
+                    >
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='text-sm font-medium text-katalyx-text'>
+                          {proposal.title}
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='text-sm text-katalyx-neutral-gray'>
+                          {proposal.clientName}
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='text-sm text-katalyx-neutral-gray'>
+                          {formatDate(proposal.createdAt)}
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        {getStatusBadge(
+                          (proposal.status as PropositionStatus) || 'draft',
+                        )}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-right'>
+                        <Link
+                          href={`/propositions/${proposal.id}`}
+                          className='text-katalyx-primary hover:text-katalyx-primary-light font-medium hover:underline transition-colors'
+                        >
+                          Voir
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
