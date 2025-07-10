@@ -9,13 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.7.0",
+    "@types/next-auth": "^3.15.0",
     "@types/puppeteer": "^7.0.4",
     "@types/uuid": "^10.0.0",
     "date-fns": "^4.1.0",
     "jspdf": "^3.0.1",
     "next": "^15.3.2",
+    "next-auth": "^4.24.11",
     "openai": "^4.98.0",
     "prisma": "^6.7.0",
     "puppeteer": "^24.8.2",
