@@ -51,6 +51,7 @@ export interface Proposal {
   paymentTerms?: PaymentTerm[];
   introduction?: string; // Optional introduction paragraph
   context?: string; // Optional project context
+  userId: string; // Add userId for ownership
 }
 
 export interface ProposalStructuredContext {

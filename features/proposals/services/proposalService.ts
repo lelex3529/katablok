@@ -8,6 +8,7 @@ interface DbProposal {
   createdAt: Date;
   updatedAt: Date;
   status: string;
+  userId: string;
   sections: DbProposalSection[];
 }
 
@@ -49,37 +50,45 @@ interface DbProposalBlock {
 function mapDatabaseToFrontend(dbProposal: DbProposal): Proposal {
   return {
     ...dbProposal,
-    sections: dbProposal.sections.map((section: DbProposalSection): ProposalSection => ({
-      ...section,
-      blocks: section.blocks.map((block: DbProposalBlock): ProposalBlock => {
-        // Create a clean version of the block with nulls converted to undefined
-        const cleanBlock: ProposalBlock = {
-          id: block.id,
-          blockId: block.blockId,
-          order: block.order,
-          sectionId: block.sectionId || undefined,
-          overrideTitle: block.overrideTitle || undefined,
-          overrideContent: block.overrideContent || undefined,
-          overrideUnitPrice: block.overrideUnitPrice || undefined,
-          overrideDuration: block.overrideDuration || undefined,
-          createdAt: block.createdAt,
-          updatedAt: block.updatedAt,
-          overrides: {
-            title: block.overrideTitle || undefined,
-            content: block.overrideContent || undefined,
-            unitPrice: block.overrideUnitPrice || undefined,
-            estimatedDuration: block.overrideDuration || undefined
-          },
-          block: block.block ? {
-            ...block.block,
-            estimatedDuration: block.block.estimatedDuration || undefined,
-            unitPrice: block.block.unitPrice || undefined
-          } : undefined
-        };
-        
-        return cleanBlock;
-      })
-    }))
+    sections: dbProposal.sections.map(
+      (section: DbProposalSection): ProposalSection => ({
+        ...section,
+        blocks: section.blocks.map((block: DbProposalBlock): ProposalBlock => {
+          // Create a clean version of the block with nulls converted to undefined
+          const cleanBlock: ProposalBlock = {
+            id: block.id,
+            blockId: block.blockId,
+            order: block.order,
+            sectionId: block.sectionId || undefined,
+            overrideTitle: block.overrideTitle || undefined,
+            overrideContent: block.overrideContent || undefined,
+            overrideUnitPrice: block.overrideUnitPrice || undefined,
+            overrideDuration: block.overrideDuration || undefined,
+            createdAt: block.createdAt,
+            updatedAt: block.updatedAt,
+            overrides: {
+              title: block.overrideTitle || undefined,
+              content: block.overrideContent || undefined,
+              unitPrice: block.overrideUnitPrice || undefined,
+              estimatedDuration: block.overrideDuration || undefined,
+            },
+            block: block.block
+              ? {
+                  ...block.block,
+                  estimatedDuration: block.block.estimatedDuration || undefined,
+                  unitPrice: block.block.unitPrice || undefined,
+                  userId:
+                    'userId' in block.block
+                      ? (block.block as { userId: string }).userId
+                      : '',
+                }
+              : undefined,
+          };
+
+          return cleanBlock;
+        }),
+      }),
+    ),
   };
 }
 
@@ -126,7 +135,9 @@ export async function getProposal(id: string): Promise<Proposal> {
 /**
  * Creates a new proposal
  */
-export async function createProposal(proposalData: Omit<Proposal, 'id' | 'createdAt' | 'updatedAt'>): Promise<Proposal> {
+export async function createProposal(
+  proposalData: Omit<Proposal, 'id' | 'createdAt' | 'updatedAt' | 'userId'>,
+): Promise<Proposal> {
   const response = await fetch('/api/proposals', {
     method: 'POST',
     headers: {
@@ -149,7 +160,7 @@ export async function createProposal(proposalData: Omit<Proposal, 'id' | 'create
  */
 export async function updateProposal(
   id: string,
-  proposalData: Partial<Omit<Proposal, 'id' | 'createdAt' | 'updatedAt'>>
+  proposalData: Partial<Omit<Proposal, 'id' | 'createdAt' | 'updatedAt'>>,
 ): Promise<Proposal> {
   const response = await fetch(`/api/proposals/${id}`, {
     method: 'PUT',

@@ -15,7 +15,10 @@ export function useBlocks(initialTitle?: string, initialCategory?: string) {
     try {
       setLoading(true);
       setError(null);
-      const data = await blockService.getBlocks(title || undefined, category || undefined);
+      const data = await blockService.getBlocks(
+        title || undefined,
+        category || undefined,
+      );
       setBlocks(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch blocks');
@@ -62,7 +65,7 @@ export function useBlock(id?: string) {
 
   const fetchBlock = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -82,9 +85,11 @@ export function useBlock(id?: string) {
     }
   }, [id, fetchBlock]);
 
-  const updateBlock = async (data: Partial<Omit<Block, 'id' | 'createdAt' | 'updatedAt'>>) => {
+  const updateBlock = async (
+    data: Partial<Omit<Block, 'id' | 'createdAt' | 'updatedAt'>>,
+  ) => {
     if (!id || !block) return null;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -100,7 +105,9 @@ export function useBlock(id?: string) {
     }
   };
 
-  const createBlock = async (data: Omit<Block, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createBlock = async (
+    data: Omit<Block, 'id' | 'createdAt' | 'updatedAt' | 'userId'>,
+  ) => {
     try {
       setLoading(true);
       setError(null);

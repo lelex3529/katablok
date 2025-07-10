@@ -356,9 +356,9 @@ export default function ProposalPdfDocument({
               {sectionNumber}. {section.title}
             </h2>
 
-            {section.description && (
+            {section.title && (
               <p style={{ marginBottom: '2rem', color: '#4B5563' }}>
-                {section.description}
+                {section.title}
               </p>
             )}
 
@@ -733,11 +733,11 @@ export default function ProposalPdfDocument({
             <p>
               Le paiement devra être effectué par virement bancaire à réception
               de la facture. Les délais de paiement sont de 30 jours à compter
-              de la date d'émission de la facture.
+              de la date d&apos;émission de la facture.
             </p>
           </div>
         ) : (
-          <p>Aucune modalité de paiement n'a été définie.</p>
+          <p>Aucune modalité de paiement n&apos;a été définie.</p>
         )}
 
         <div className='footer-container'>
@@ -784,7 +784,7 @@ export default function ProposalPdfDocument({
           </div>
 
           <p style={{ color: '#6B7280', maxWidth: '500px', margin: '0 auto' }}>
-            Merci de nous avoir accordé l'opportunité de vous proposer nos
+            Merci de nous avoir accordé l&apos;opportunité de vous proposer nos
             services. Nous sommes impatients de collaborer avec vous sur ce
             projet.
           </p>

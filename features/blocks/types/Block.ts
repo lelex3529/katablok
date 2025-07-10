@@ -9,4 +9,5 @@ export interface Block {
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;
+  userId: string; // Add userId for ownership
 }

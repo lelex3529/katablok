@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { ProposalSection, ProposalBlock } from '@/features/proposals/types/Proposal';
+import {
+  ProposalSection,
+  ProposalBlock,
+} from '@/features/proposals/types/Proposal';
+import { getServerSession } from 'next-auth';
+import authOptions from '@/lib/authOptions';
 
 // GET /api/proposals - Get all proposals
 export async function GET() {
@@ -30,7 +35,7 @@ export async function GET() {
     console.error('Error fetching proposals:', error);
     return NextResponse.json(
       { error: 'Failed to fetch proposals' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -38,20 +43,28 @@ export async function GET() {
 // POST /api/proposals - Create a new proposal
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 401 });
+    }
     const data = await request.json();
     console.log('Received proposal data:', JSON.stringify(data));
-    
     // Validate required fields
     const requiredFields = ['title', 'clientName', 'sections'];
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
           { error: `${field} is required` },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
-
     // Create proposal using a transaction for data integrity
     const proposal = await prisma.$transaction(async (tx) => {
       // 1. Create the proposal
@@ -60,9 +73,9 @@ export async function POST(request: NextRequest) {
           title: data.title,
           clientName: data.clientName,
           status: 'draft',
+          userId: user.id,
         },
       });
-
       // 2. Create sections
       for (const section of data.sections as Partial<ProposalSection>[]) {
         const newSection = await tx.proposalSection.create({
@@ -72,7 +85,6 @@ export async function POST(request: NextRequest) {
             proposalId: newProposal.id,
           },
         });
-
         // 3. Create blocks for this section
         if (section.blocks && section.blocks.length > 0) {
           for (const block of section.blocks as Partial<ProposalBlock>[]) {
@@ -82,15 +94,17 @@ export async function POST(request: NextRequest) {
                 sectionId: newSection.id,
                 order: block.order || 0,
                 overrideTitle: block.overrideTitle || block.overrides?.title,
-                overrideContent: block.overrideContent || block.overrides?.content,
-                overrideUnitPrice: block.overrideUnitPrice || block.overrides?.unitPrice,
-                overrideDuration: block.overrideDuration || block.overrides?.estimatedDuration,
+                overrideContent:
+                  block.overrideContent || block.overrides?.content,
+                overrideUnitPrice:
+                  block.overrideUnitPrice || block.overrides?.unitPrice,
+                overrideDuration:
+                  block.overrideDuration || block.overrides?.estimatedDuration,
               },
             });
           }
         }
       }
-
       // 4. Return the created proposal with relations
       return tx.proposal.findUnique({
         where: { id: newProposal.id },
@@ -107,13 +121,14 @@ export async function POST(request: NextRequest) {
         },
       });
     });
-
     return NextResponse.json(proposal, { status: 201 });
   } catch (error) {
     console.error('Error creating proposal:', error);
     return NextResponse.json(
-      { error: `Failed to create proposal: ${error instanceof Error ? error.message : 'Unknown error'}` },
-      { status: 500 }
+      {
+        error: `Failed to create proposal: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      },
+      { status: 500 },
     );
   }
 }

@@ -1,5 +1,5 @@
-import puppeteer from 'puppeteer';
-import { Proposal } from '../types/Proposal';
+import puppeteer, { Browser } from 'puppeteer';
+import { Proposal, ProposalBlock } from '../types/Proposal';
 import { formatDate } from '@/lib/utils';
 
 /**
@@ -12,13 +12,14 @@ export async function generateProposalPdf(proposal: Proposal): Promise<Buffer> {
   // Generate HTML content for the proposal
   const htmlContent = generateProposalHtml(proposal);
 
-  // Launch a headless browser
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
-
+  let browser: Browser | null = null;
   try {
+    // Launch a headless browser
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
     // Create a new page
     const page = await browser.newPage();
 
@@ -26,7 +27,7 @@ export async function generateProposalPdf(proposal: Proposal): Promise<Buffer> {
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
     // Generate PDF with A4 size
-    const pdfBuffer = await page.pdf({
+    const pdfBufferRaw = await page.pdf({
       format: 'A4',
       printBackground: true,
       margin: {
@@ -38,10 +39,14 @@ export async function generateProposalPdf(proposal: Proposal): Promise<Buffer> {
       displayHeaderFooter: false,
     });
 
+    // Ensure we return a Node.js Buffer
+    const pdfBuffer = Buffer.from(pdfBufferRaw);
     return pdfBuffer;
   } finally {
-    // Always close the browser
-    await browser.close();
+    // Always close the browser if it was launched
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
@@ -65,11 +70,11 @@ export function getProposalPdfFilename(proposal: Proposal): string {
 /**
  * Function to get block content considering overrides
  */
-function getBlockContent(block: any): string {
+function getBlockContent(block: ProposalBlock): string {
   return (
     block.overrideContent ||
     block.overrides?.content ||
-    block.block?.content ||
+    (block.block && block.block.content) ||
     ''
   );
 }
@@ -77,32 +82,33 @@ function getBlockContent(block: any): string {
 /**
  * Function to get block title considering overrides
  */
-function getBlockTitle(block: any): string {
+function getBlockTitle(block: ProposalBlock): string {
   return (
-    block.overrideTitle || block.overrides?.title || block.block?.title || ''
+    block.overrideTitle ||
+    block.overrides?.title ||
+    (block.block && block.block.title) ||
+    ''
   );
 }
 
 /**
  * Function to get block duration considering overrides
  */
-function getBlockDuration(block: any): number | undefined {
-  return block.overrideDuration !== undefined
-    ? block.overrideDuration
-    : block.overrides?.estimatedDuration !== undefined
-      ? block.overrides.estimatedDuration
-      : block.block?.estimatedDuration;
+function getBlockDuration(block: ProposalBlock): number | undefined {
+  if (block.overrideDuration !== undefined) return block.overrideDuration;
+  if (block.overrides?.estimatedDuration !== undefined)
+    return block.overrides.estimatedDuration;
+  return block.block?.estimatedDuration;
 }
 
 /**
  * Function to get block price considering overrides
  */
-function getBlockPrice(block: any): number | undefined {
-  return block.overrideUnitPrice !== undefined
-    ? block.overrideUnitPrice
-    : block.overrides?.unitPrice !== undefined
-      ? block.overrides.unitPrice
-      : block.block?.unitPrice;
+function getBlockPrice(block: ProposalBlock): number | undefined {
+  if (block.overrideUnitPrice !== undefined) return block.overrideUnitPrice;
+  if (block.overrides?.unitPrice !== undefined)
+    return block.overrides.unitPrice;
+  return block.block?.unitPrice;
 }
 
 /**
@@ -479,10 +485,10 @@ function generateProposalHtml(proposal: Proposal): string {
             </h2>
             
             ${
-              section.description
+              section.title
                 ? `
               <p style="margin-bottom: 2rem; color: #4B5563;">
-                ${section.description}
+                ${section.title}
               </p>
             `
                 : ''
@@ -581,8 +587,9 @@ function generateProposalHtml(proposal: Proposal): string {
               </thead>
               <tbody>
                 ${timeline
-                  .map(
-                    (item: any) => `
+                  .map((item) => {
+                    if (!item) return '';
+                    return `
                   <tr>
                     <td style="padding: 10px; border-bottom: 1px solid #E5E7EB; font-weight: bold;">${item.name}</td>
                     <td style="padding: 10px; border-bottom: 1px solid #E5E7EB;">${item.description}</td>
@@ -595,8 +602,8 @@ function generateProposalHtml(proposal: Proposal): string {
                       }
                     </td>
                   </tr>
-                `,
-                  )
+                `;
+                  })
                   .join('')}
               </tbody>
             </table>
@@ -710,7 +717,11 @@ function generateProposalHtml(proposal: Proposal): string {
             <ul style="padding-left: 20px; margin-bottom: 2rem;">
               ${proposal.paymentTerms
                 .map(
-                  (term: any) => `
+                  (term: {
+                    label: string;
+                    percent: number;
+                    trigger: string;
+                  }) => `
                 <li style="margin-bottom: 1rem;">
                   <strong>${term.label}</strong> (${Math.round((totalPrice * term.percent) / 100).toLocaleString()}€)
                   &nbsp;${term.trigger}

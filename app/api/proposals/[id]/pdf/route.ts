@@ -4,6 +4,7 @@ import {
   getProposalPdfFilename,
 } from '@/features/proposals/pdf/generateProposalPdf';
 import prisma from '@/lib/prisma';
+import { mapDatabaseToFrontend } from '@/features/proposals/utils/mapDatabaseToFrontend';
 
 type Params = Promise<{ id: string }>;
 
@@ -18,7 +19,7 @@ export async function GET(
     const { id: proposalId } = await params;
 
     // Fetch the proposal with all its sections and blocks
-    const proposal = await prisma.proposal.findUnique({
+    const dbProposal = await prisma.proposal.findUnique({
       where: { id: proposalId },
       include: {
         sections: {
@@ -33,12 +34,15 @@ export async function GET(
       },
     });
 
-    if (!proposal) {
+    if (!dbProposal) {
       return NextResponse.json(
         { error: 'Proposal not found' },
         { status: 404 },
       );
     }
+
+    // Map to frontend Proposal type
+    const proposal = mapDatabaseToFrontend(dbProposal);
 
     // Generate the PDF
     const pdfBuffer = await generateProposalPdf(proposal);

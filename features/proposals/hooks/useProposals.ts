@@ -16,7 +16,9 @@ export function useProposals() {
       const data = await proposalService.getProposals();
       setProposals(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch proposals');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch proposals',
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -31,9 +33,13 @@ export function useProposals() {
     try {
       setLoading(true);
       await proposalService.deleteProposal(id);
-      setProposals((prevProposals) => prevProposals.filter((proposal) => proposal.id !== id));
+      setProposals((prevProposals) =>
+        prevProposals.filter((proposal) => proposal.id !== id),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete proposal');
+      setError(
+        err instanceof Error ? err.message : 'Failed to delete proposal',
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -56,7 +62,7 @@ export function useProposal(id?: string) {
 
   const fetchProposal = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -76,9 +82,11 @@ export function useProposal(id?: string) {
     }
   }, [id, fetchProposal]);
 
-  const updateProposal = async (data: Partial<Omit<Proposal, 'id' | 'createdAt' | 'updatedAt'>>) => {
+  const updateProposal = async (
+    data: Partial<Omit<Proposal, 'id' | 'createdAt' | 'updatedAt'>>,
+  ) => {
     if (!id || !proposal) return null;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -86,7 +94,9 @@ export function useProposal(id?: string) {
       setProposal(updatedProposal);
       return updatedProposal;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update proposal');
+      setError(
+        err instanceof Error ? err.message : 'Failed to update proposal',
+      );
       console.error(err);
       return null;
     } finally {
@@ -94,7 +104,9 @@ export function useProposal(id?: string) {
     }
   };
 
-  const createProposal = async (data: Omit<Proposal, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createProposal = async (
+    data: Omit<Proposal, 'id' | 'createdAt' | 'updatedAt' | 'userId'>,
+  ) => {
     try {
       setLoading(true);
       setError(null);
@@ -102,7 +114,9 @@ export function useProposal(id?: string) {
       setProposal(newProposal);
       return newProposal;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create proposal');
+      setError(
+        err instanceof Error ? err.message : 'Failed to create proposal',
+      );
       console.error(err);
       return null;
     } finally {
@@ -127,12 +141,15 @@ export function useProposalDraft() {
     clientName: '',
     createdAt: new Date(),
     updatedAt: new Date(),
-    sections: [{
-      id: `section-${Date.now()}`,
-      title: 'Introduction',
-      order: 0,
-      blocks: []
-    }]
+    userId: '', // Add userId for type compatibility
+    sections: [
+      {
+        id: `section-${Date.now()}`,
+        title: 'Introduction',
+        order: 0,
+        blocks: [],
+      },
+    ],
   }));
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
@@ -143,14 +160,19 @@ export function useProposalDraft() {
   };
 
   // Update specific properties
-  const updateProperty = <T extends keyof Omit<Proposal, 'id' | 'createdAt' | 'updatedAt' | 'sections'>>(
-    property: T, 
-    value: Proposal[T]
+  const updateProperty = <
+    T extends keyof Omit<
+      Proposal,
+      'id' | 'createdAt' | 'updatedAt' | 'sections'
+    >,
+  >(
+    property: T,
+    value: Proposal[T],
   ) => {
-    setDraft(prev => ({
+    setDraft((prev) => ({
       ...prev,
       [property]: value,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }));
     setUnsavedChanges(true);
   };
@@ -161,108 +183,117 @@ export function useProposalDraft() {
       id: `section-${Date.now()}`,
       title,
       order: draft.sections.length,
-      blocks: []
+      blocks: [],
     };
-    
-    setDraft(prev => ({
+
+    setDraft((prev) => ({
       ...prev,
       sections: [...prev.sections, newSection],
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }));
     setUnsavedChanges(true);
-    
+
     return newSection.id;
   };
 
   // Update a section
-  const updateSection = (sectionId: string, updates: Partial<Omit<ProposalSection, 'id'>>) => {
-    setDraft(prev => ({
+  const updateSection = (
+    sectionId: string,
+    updates: Partial<Omit<ProposalSection, 'id'>>,
+  ) => {
+    setDraft((prev) => ({
       ...prev,
-      sections: prev.sections.map(section => 
-        section.id === sectionId 
-          ? { ...section, ...updates } 
-          : section
+      sections: prev.sections.map((section) =>
+        section.id === sectionId ? { ...section, ...updates } : section,
       ),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }));
     setUnsavedChanges(true);
   };
 
   // Delete a section
   const deleteSection = (sectionId: string) => {
-    setDraft(prev => {
-      const filteredSections = prev.sections.filter(s => s.id !== sectionId);
-      
+    setDraft((prev) => {
+      const filteredSections = prev.sections.filter((s) => s.id !== sectionId);
+
       // Re-order the remaining sections
       const reorderedSections = filteredSections.map((section, index) => ({
         ...section,
-        order: index
+        order: index,
       }));
-      
+
       return {
         ...prev,
         sections: reorderedSections,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
   };
 
   // Add a block to a section
-  const addBlock = (sectionId: string, block: Omit<ProposalBlock, 'id' | 'order'>) => {
+  const addBlock = (
+    sectionId: string,
+    block: Omit<ProposalBlock, 'id' | 'order'>,
+  ) => {
     const blockId = `block-${Date.now()}`;
-    
-    setDraft(prev => {
-      const sectionIndex = prev.sections.findIndex(s => s.id === sectionId);
-      
+
+    setDraft((prev) => {
+      const sectionIndex = prev.sections.findIndex((s) => s.id === sectionId);
+
       if (sectionIndex === -1) return prev;
-      
+
       const updatedSections = [...prev.sections];
       const section = updatedSections[sectionIndex];
-      
+
       updatedSections[sectionIndex] = {
         ...section,
-        blocks: [...section.blocks, {
-          ...block,
-          id: blockId,
-          order: section.blocks.length
-        }]
+        blocks: [
+          ...section.blocks,
+          {
+            ...block,
+            id: blockId,
+            order: section.blocks.length,
+          },
+        ],
       };
-      
+
       return {
         ...prev,
         sections: updatedSections,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
-    
+
     return blockId;
   };
 
   // Update a block
-  const updateBlock = (sectionId: string, blockId: string, updates: Partial<Omit<ProposalBlock, 'id'>>) => {
-    setDraft(prev => {
-      const sectionIndex = prev.sections.findIndex(s => s.id === sectionId);
-      
+  const updateBlock = (
+    sectionId: string,
+    blockId: string,
+    updates: Partial<Omit<ProposalBlock, 'id'>>,
+  ) => {
+    setDraft((prev) => {
+      const sectionIndex = prev.sections.findIndex((s) => s.id === sectionId);
+
       if (sectionIndex === -1) return prev;
-      
+
       const updatedSections = [...prev.sections];
       const section = updatedSections[sectionIndex];
-      
+
       updatedSections[sectionIndex] = {
         ...section,
-        blocks: section.blocks.map(block => 
-          block.id === blockId 
-            ? { ...block, ...updates } 
-            : block
-        )
+        blocks: section.blocks.map((block) =>
+          block.id === blockId ? { ...block, ...updates } : block,
+        ),
       };
-      
+
       return {
         ...prev,
         sections: updatedSections,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
@@ -270,31 +301,31 @@ export function useProposalDraft() {
 
   // Delete a block
   const deleteBlock = (sectionId: string, blockId: string) => {
-    setDraft(prev => {
-      const sectionIndex = prev.sections.findIndex(s => s.id === sectionId);
-      
+    setDraft((prev) => {
+      const sectionIndex = prev.sections.findIndex((s) => s.id === sectionId);
+
       if (sectionIndex === -1) return prev;
-      
+
       const updatedSections = [...prev.sections];
       const section = updatedSections[sectionIndex];
-      
-      const filteredBlocks = section.blocks.filter(b => b.id !== blockId);
-      
+
+      const filteredBlocks = section.blocks.filter((b) => b.id !== blockId);
+
       // Re-order the remaining blocks
       const reorderedBlocks = filteredBlocks.map((block, index) => ({
         ...block,
-        order: index
+        order: index,
       }));
-      
+
       updatedSections[sectionIndex] = {
         ...section,
-        blocks: reorderedBlocks
+        blocks: reorderedBlocks,
       };
-      
+
       return {
         ...prev,
         sections: updatedSections,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
@@ -302,33 +333,37 @@ export function useProposalDraft() {
 
   // Reorder blocks within a section
   const reorderBlocks = (sectionId: string, blockIds: string[]) => {
-    setDraft(prev => {
-      const sectionIndex = prev.sections.findIndex(s => s.id === sectionId);
-      
+    setDraft((prev) => {
+      const sectionIndex = prev.sections.findIndex((s) => s.id === sectionId);
+
       if (sectionIndex === -1) return prev;
-      
+
       const updatedSections = [...prev.sections];
       const section = updatedSections[sectionIndex];
-      
+
       // Create a map of existing blocks by ID for quick lookup
-      const blockMap = new Map(section.blocks.map(block => [block.id, block]));
-      
+      const blockMap = new Map(
+        section.blocks.map((block) => [block.id, block]),
+      );
+
       // Create new blocks array with updated order
-      const reorderedBlocks = blockIds.map((id, index) => {
-        const block = blockMap.get(id);
-        if (!block) return null;
-        return { ...block, order: index };
-      }).filter(Boolean) as ProposalBlock[];
-      
+      const reorderedBlocks = blockIds
+        .map((id, index) => {
+          const block = blockMap.get(id);
+          if (!block) return null;
+          return { ...block, order: index };
+        })
+        .filter(Boolean) as ProposalBlock[];
+
       updatedSections[sectionIndex] = {
         ...section,
-        blocks: reorderedBlocks
+        blocks: reorderedBlocks,
       };
-      
+
       return {
         ...prev,
         sections: updatedSections,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
@@ -336,21 +371,25 @@ export function useProposalDraft() {
 
   // Reorder sections
   const reorderSections = (sectionIds: string[]) => {
-    setDraft(prev => {
+    setDraft((prev) => {
       // Create a map of existing sections by ID for quick lookup
-      const sectionMap = new Map(prev.sections.map(section => [section.id, section]));
-      
+      const sectionMap = new Map(
+        prev.sections.map((section) => [section.id, section]),
+      );
+
       // Create new sections array with updated order
-      const reorderedSections = sectionIds.map((id, index) => {
-        const section = sectionMap.get(id);
-        if (!section) return null;
-        return { ...section, order: index };
-      }).filter(Boolean) as ProposalSection[];
-      
+      const reorderedSections = sectionIds
+        .map((id, index) => {
+          const section = sectionMap.get(id);
+          if (!section) return null;
+          return { ...section, order: index };
+        })
+        .filter(Boolean) as ProposalSection[];
+
       return {
         ...prev,
         sections: reorderedSections,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
@@ -361,15 +400,17 @@ export function useProposalDraft() {
     let totalCost = 0;
     let totalDuration = 0;
 
-    draft.sections.forEach(section => {
-      section.blocks.forEach(block => {
-        const unitPrice = block.overrides.unitPrice !== undefined 
-          ? block.overrides.unitPrice 
-          : 0; // In a real app, we'd fetch the base block price
-          
-        const estimatedDuration = block.overrides.estimatedDuration !== undefined
-          ? block.overrides.estimatedDuration
-          : 0; // In a real app, we'd fetch the base block duration
+    draft.sections.forEach((section) => {
+      section.blocks.forEach((block) => {
+        const unitPrice =
+          block.overrides.unitPrice !== undefined
+            ? block.overrides.unitPrice
+            : 0; // In a real app, we'd fetch the base block price
+
+        const estimatedDuration =
+          block.overrides.estimatedDuration !== undefined
+            ? block.overrides.estimatedDuration
+            : 0; // In a real app, we'd fetch the base block duration
 
         totalCost += unitPrice;
         totalDuration += estimatedDuration;
@@ -386,26 +427,26 @@ export function useProposalDraft() {
 
   // Duplicate a section
   const duplicateSection = (sectionId: string) => {
-    setDraft(prev => {
-      const sectionToDuplicate = prev.sections.find(s => s.id === sectionId);
-      
+    setDraft((prev) => {
+      const sectionToDuplicate = prev.sections.find((s) => s.id === sectionId);
+
       if (!sectionToDuplicate) return prev;
-      
+
       const duplicatedSection = {
         ...sectionToDuplicate,
         id: `section-${Date.now()}`,
         title: `${sectionToDuplicate.title} (Copy)`,
         order: prev.sections.length,
-        blocks: sectionToDuplicate.blocks.map(block => ({
+        blocks: sectionToDuplicate.blocks.map((block) => ({
           ...block,
-          id: `block-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-        }))
+          id: `block-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        })),
       };
-      
+
       return {
         ...prev,
         sections: [...prev.sections, duplicatedSection],
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
@@ -413,32 +454,32 @@ export function useProposalDraft() {
 
   // Duplicate a block
   const duplicateBlock = (sectionId: string, blockId: string) => {
-    setDraft(prev => {
-      const sectionIndex = prev.sections.findIndex(s => s.id === sectionId);
-      
+    setDraft((prev) => {
+      const sectionIndex = prev.sections.findIndex((s) => s.id === sectionId);
+
       if (sectionIndex === -1) return prev;
-      
+
       const updatedSections = [...prev.sections];
       const section = updatedSections[sectionIndex];
-      const blockToDuplicate = section.blocks.find(b => b.id === blockId);
-      
+      const blockToDuplicate = section.blocks.find((b) => b.id === blockId);
+
       if (!blockToDuplicate) return prev;
-      
+
       const duplicatedBlock = {
         ...blockToDuplicate,
         id: `block-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        order: section.blocks.length
+        order: section.blocks.length,
       };
-      
+
       updatedSections[sectionIndex] = {
         ...section,
-        blocks: [...section.blocks, duplicatedBlock]
+        blocks: [...section.blocks, duplicatedBlock],
       };
-      
+
       return {
         ...prev,
         sections: updatedSections,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     });
     setUnsavedChanges(true);
@@ -460,6 +501,6 @@ export function useProposalDraft() {
     getTotals,
     markAsSaved,
     duplicateSection,
-    duplicateBlock
+    duplicateBlock,
   };
 }

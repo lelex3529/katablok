@@ -14,7 +14,7 @@ import {
 type BlockFormProps = {
   initialData?: Partial<Block>;
   onSubmit: (
-    data: Omit<Block, 'id' | 'createdAt' | 'updatedAt'>,
+    data: Omit<Block, 'id' | 'createdAt' | 'updatedAt' | 'userId'>,
   ) => Promise<Block | null>;
   isNew?: boolean;
   availableCategories?: string[]; // Added for autocomplete suggestions

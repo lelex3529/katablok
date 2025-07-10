@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma';
  */
 export async function getBlocks(
   title?: string,
-  category?: string
+  category?: string,
 ): Promise<Block[]> {
   const params = new URLSearchParams();
   if (title) params.append('title', title);
@@ -53,7 +53,9 @@ export async function getBlock(id: string): Promise<Block> {
 /**
  * Creates a new block
  */
-export async function createBlock(blockData: Omit<Block, 'id' | 'createdAt' | 'updatedAt'>): Promise<Block> {
+export async function createBlock(
+  blockData: Omit<Block, 'id' | 'createdAt' | 'updatedAt' | 'userId'>,
+): Promise<Block> {
   const response = await fetch('/api/blocks', {
     method: 'POST',
     headers: {
@@ -75,7 +77,7 @@ export async function createBlock(blockData: Omit<Block, 'id' | 'createdAt' | 'u
  */
 export async function updateBlock(
   id: string,
-  blockData: Partial<Omit<Block, 'id' | 'createdAt' | 'updatedAt'>>
+  blockData: Partial<Omit<Block, 'id' | 'createdAt' | 'updatedAt'>>,
 ): Promise<Block> {
   const response = await fetch(`/api/blocks/${id}`, {
     method: 'PUT',
@@ -118,13 +120,15 @@ export async function getServerBlock(id: string): Promise<Block | null> {
     const block = await prisma.block.findUnique({
       where: { id },
     });
-    
+
     // Transform from Prisma model to Block type
-    return block ? {
-      ...block,
-      estimatedDuration: block.estimatedDuration ?? undefined,
-      unitPrice: block.unitPrice ?? undefined
-    } : null;
+    return block
+      ? {
+          ...block,
+          estimatedDuration: block.estimatedDuration ?? undefined,
+          unitPrice: block.unitPrice ?? undefined,
+        }
+      : null;
   } catch (error) {
     console.error('Failed to fetch block:', error);
     return null;
@@ -136,11 +140,13 @@ export async function getServerBlock(id: string): Promise<Block | null> {
  */
 export async function getServerBlocks(
   title?: string,
-  category?: string
+  category?: string,
 ): Promise<Block[]> {
   try {
     const where = {
-      ...(title && { title: { contains: title, mode: 'insensitive' as const } }),
+      ...(title && {
+        title: { contains: title, mode: 'insensitive' as const },
+      }),
       ...(category && { category }),
     };
 
@@ -150,10 +156,10 @@ export async function getServerBlocks(
     });
 
     // Transform from Prisma model to Block type
-    return blocks.map(block => ({
+    return blocks.map((block) => ({
       ...block,
       estimatedDuration: block.estimatedDuration ?? undefined,
-      unitPrice: block.unitPrice ?? undefined
+      unitPrice: block.unitPrice ?? undefined,
     }));
   } catch (error) {
     console.error('Failed to fetch blocks:', error);
