@@ -13,9 +13,11 @@ import {
   XMarkIcon,
   ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -120,7 +122,7 @@ export default function Sidebar() {
               </div>
               <div className='ml-3'>
                 <p className='text-sm font-medium text-katalyx-text'>
-                  Utilisateur
+                  {session?.user?.email || 'Utilisateur'}
                 </p>
                 <button className='text-xs text-katalyx-secondary hover:text-katalyx-secondary-light flex items-center mt-1 transition-colors'>
                   <ArrowRightStartOnRectangleIcon className='h-3 w-3 mr-1' />
